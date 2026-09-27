@@ -2420,7 +2420,7 @@ const L5R = {
         this.saveCharacter();
     },
 
-    renderStatuses: function() {
+        renderStatuses: function() {
         const container = document.getElementById('l5r-statuses-container');
         if (!container) return; container.innerHTML = '';
         STATUSES_LIST.forEach(st => {
@@ -2443,7 +2443,6 @@ const L5R = {
                 const rounds = window.characterStatuses['dying_rounds'] !== undefined ? window.characterStatuses['dying_rounds'] : 5;
                 const textLabel = active ? ("Осталось: " + rounds) : "Здоров";
                 
-                // НАСТРОЕНО: Добавлены стили активного нажатия (вспышка золотом при клике)
                 const btnStyle = 'background: #8b0000; color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.1s;';
                 extraHTML = '<div style="display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #111; padding: 4px 12px; border-radius: 5px; border: 1px solid #444;">' +
                     '<button onclick="event.stopPropagation(); this.style.background=\'#d4af37\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'#8b0000\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(-1);" style="' + btnStyle + '">-</button>' +
@@ -2633,7 +2632,7 @@ const L5R = {
             zeni: document.getElementById('money-zeni') ? document.getElementById('money-zeni').innerText : '0',
             statuses: window.characterStatuses || {},
             stance: window.characterStance || '',
-            honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '50',
+            honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '30',
             glory: document.getElementById('social-glory') ? document.getElementById('social-glory').innerText : '30',
             status: document.getElementById('social-status') ? document.getElementById('social-status').innerText : '30'
 
