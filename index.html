@@ -56,7 +56,53 @@
         .btn-char-create:hover { background: #8b0000; }
         .btn-char-delete { background: none; border: none; color: #ef5350; cursor: pointer; font-size: 16px; padding: 5px; transition: transform 0.1s; }
         .btn-char-delete:hover { transform: scale(1.2); }
-                
+                /* МОБИЛЬНАЯ АДАПТАЦИЯ ИНТЕРФЕЙСА ДЛЯ СМАРТФОНОВ */
+        @media (max-width: 480px) {
+            body { padding: 6px; background-color: #0b0b0b; }
+            .container { padding: 10px; border-width: 1px; border-radius: 8px; box-shadow: none; max-width: 100%; }
+            h1 { font-size: 18px; padding-bottom: 6px; margin-bottom: 12px; }
+            h2 { font-size: 14px; margin-top: 15px; padding-bottom: 3px; }
+            .info-grid { grid-template-columns: 1fr; gap: 0; }
+            .input-group { margin-bottom: 8px; }
+            input, textarea, select { padding: 8px; font-size: 13px; }
+            .btn-mode-toggle { padding: 10px; font-size: 11px; letter-spacing: 0.5px; }
+            
+            /* АДАПТАЦИЯ КОЛЕЦ И ХАРАКТЕРИСТИК */
+            .ring-grid { grid-template-columns: 1fr; gap: 6px; }
+            .ring-card { padding: 8px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+            .ring-name { margin-bottom: 0; font-size: 14px; }
+            .btn-ring { width: 34px; height: 34px; font-size: 16px; }
+            .ring-value { font-size: 18px; min-width: 20px; }
+            .attr-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+            .attr-card { padding: 8px; }
+            .attr-name { font-size: 10px; }
+            .attr-value { font-size: 16px; }
+            .attr-grid div[style*="grid-column: span 2"] { padding: 8px 10px !important; }
+            
+            /* СТАТУСЫ, МОНЕТЫ И НЕГАТИВНЫЕ СОСТОЯНИЯ */
+            div[style*="grid-template-columns: repeat(3, 1fr)"] { 
+                grid-template-columns: 1fr !important; 
+                gap: 10px !important; 
+                padding: 10px !important; 
+            }
+            div[style*="border-right: 1px dashed"] { 
+                border-right: none !important; 
+                border-bottom: 1px dashed #444; 
+                padding-right: 0 !important; 
+                padding-bottom: 8px; 
+            }
+            div[style*="padding-left: 4px"] { padding-left: 0 !important; }
+            
+            #l5r-statuses-container { grid-template-columns: 1fr !important; gap: 6px !important; }
+            #l5r-statuses-container div[style*="grid-column: span 2"] { grid-column: span 1 !important; }
+            
+            /* НАВЫКИ И КНОПКИ */
+            .skill-name { font-size: 12px; padding-right: 4px; }
+            .btn-skill { width: 24px; height: 24px; font-size: 14px; }
+            .skill-value { font-size: 14px; min-width: 16px; }
+            .status-title { font-size: 12px; }
+        }
+           
     </style>
 </head>
 <body onload="L5R.init();">
@@ -2288,14 +2334,14 @@ const STATUSES_LIST = [
     { id: 'enraged', name: 'РАЗГНЕВАННЫЙ', hasRing: false },
     { id: 'exhausted', name: 'ИСТОЩЁННЫЙ', hasRing: false },
     { id: 'immobilized', name: 'ОБЕЗДВИЖЕННЫЙ', hasRing: false },
-    { id: 'incapacitated', name: 'НЕДЕЕСПОСОБНЫЙ', hasRing: false },
-    { id: 'dying', name: 'ПРИ СМЕРТИ [X РАУНДОВ]', hasRing: false },
+    { id: 'incapacitated', name: 'НЕДЕЕСПОСОБНЫЙ', hasRing: false },    
     { id: 'intoxicated', name: 'ОПЬЯНЁННЫЙ', hasRing: false },
     { id: 'prone', name: 'РАСПЛАСТАННЫЙ', hasRing: false },
     { id: 'silenced', name: 'БЕЗМОЛВИЕ', hasRing: false },
     { id: 'unconscious', name: 'БЕССОЗНАТЕЛЬНЫЙ', hasRing: false },
     { id: 'lightly_wounded', name: 'Легкораненый', hasRing: true },
-    { id: 'severely_wounded', name: 'Тяжелораненый', hasRing: true }
+    { id: 'severely_wounded', name: 'Тяжелораненый', hasRing: true },
+    { id: 'dying', name: 'ПРИ СМЕРТИ [X РАУНДОВ]', hasRing: false }
 ];
 
 window.characterStatuses = {}; // Хранилище активных состояний
@@ -2332,8 +2378,35 @@ const L5R = {
     toggleStatus: function(id) {
         if (!window.characterStatuses) window.characterStatuses = {};
         window.characterStatuses[id] = !window.characterStatuses[id];
+        
+        // ИСПРАВЛЕНО: Теперь при включении состояния раунды выставляются строго на 5
+        if (id === 'dying' && !window.characterStatuses['dying']) {
+            window.characterStatuses['dying_rounds'] = 5;
+        } 
+        else if (id === 'dying' && window.characterStatuses['dying'] && window.characterStatuses['dying_rounds'] === undefined) {
+            window.characterStatuses['dying_rounds'] = 5;
+        }
+        
         this.renderStatuses();
         this.saveCharacter();
+    },
+
+
+    changeDyingRounds: function(amount) {
+        if (!window.characterStatuses) window.characterStatuses = {};
+        let current = window.characterStatuses['dying_rounds'] !== undefined ? window.characterStatuses['dying_rounds'] : 5;
+        let next = current + amount;
+        
+        // Удерживаем счетчик жестко в рамках от 0 до 5 раундов
+        if (next >= 0 && next <= 5) {
+            window.characterStatuses['dying_rounds'] = next;
+            // Если осталось меньше 5 раундов — самурай официально при смерти (включаем подсветку)
+            // Если вернулись на 5 — состояние полностью снимается
+            window.characterStatuses['dying'] = (next < 5 && next > 0) || next === 0;
+            
+            this.renderStatuses();
+            this.saveCharacter();
+        }
     },
 
     toggleStatusRing: function(id, ringId) {
@@ -2353,19 +2426,34 @@ const L5R = {
         STATUSES_LIST.forEach(st => {
             const active = !!window.characterStatuses[st.id];
             const card = document.createElement('div');
-            card.style.cssText = `background: ${active ? '#5a1a1a' : '#2a2a2a'}; border: 1px solid ${active ? '#d4af37' : '#444'}; padding: 6px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; user-select: none; text-align: center; ${st.hasRing ? 'grid-column: span 2;' : ''}`;
-            let ringControlsHTML = '';
+            
+            const isComplex = st.hasRing || st.id === 'dying';
+            card.style.cssText = "background: " + (active ? "#5a1a1a" : "#2a2a2a") + "; border: 1px solid " + (active ? "#d4af37" : "#444") + "; padding: 8px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; user-select: none; text-align: center; " + (isComplex ? "grid-column: span 2;" : "");
+            
+            let extraHTML = '';
             if (st.hasRing) {
                 const rings = [{ id: 'air', label: '💨 Возд' }, { id: 'earth', label: '⛰️ Зем' }, { id: 'fire', label: '🔥 Огн' }, { id: 'water', label: '💧 Вод' }, { id: 'void', label: '🌌 Пуст' }];
-                ringControlsHTML = `<div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center;">`;
+                extraHTML = '<div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center; width: 100%;">';
                 rings.forEach(r => {
                     const isRingActive = !!(window.characterStatuses[st.id + '_' + r.id]);
-                    ringControlsHTML += `<button onclick="event.stopPropagation(); L5R.toggleStatusRing('${st.id}', '${r.id}');" style="background: ${isRingActive ? '#b71c1c' : '#111'}; color: #fff; border: 1px solid ${isRingActive ? '#d4af37' : '#555'}; padding: 3px 6px; font-size: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">${r.label}</button>`;
+                    extraHTML += '<button onclick="event.stopPropagation(); L5R.toggleStatusRing(\'' + st.id + '\', \'' + r.id + '\');" style="background: ' + (isRingActive ? '#b71c1c' : '#111') + '; color: #fff; border: 1px solid ' + (isRingActive ? '#d4af37' : '#555') + '; padding: 6px 10px; font-size: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; min-width: 70px; box-sizing: border-box;">' + r.label + '</button>';
                 });
-                ringControlsHTML += `</div>`;
+                extraHTML += '</div>';
+            } else if (st.id === 'dying') {
+                const rounds = window.characterStatuses['dying_rounds'] !== undefined ? window.characterStatuses['dying_rounds'] : 5;
+                const textLabel = active ? ("Осталось: " + rounds) : "Здоров";
+                
+                // НАСТРОЕНО: Добавлены стили активного нажатия (вспышка золотом при клике)
+                const btnStyle = 'background: #8b0000; color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.1s;';
+                extraHTML = '<div style="display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #111; padding: 4px 12px; border-radius: 5px; border: 1px solid #444;">' +
+                    '<button onclick="event.stopPropagation(); this.style.background=\'#d4af37\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'#8b0000\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(-1);" style="' + btnStyle + '">-</button>' +
+                    '<span style="font-size: 14px; font-weight: bold; color: ' + (active ? '#ff1100' : '#aaa') + '; min-width: 90px; text-align: center;">' + textLabel + '</span>' +
+                    '<button onclick="event.stopPropagation(); this.style.background=\'#d4af37\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'#8b0000\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(1);" style="' + btnStyle + '">+</button>' +
+                '</div>';
             }
-            card.onclick = st.hasRing ? null : () => this.toggleStatus(st.id);
-            card.innerHTML = `<span style="font-size: 11px; font-weight: bold; color: ${active ? '#fff' : '#aaa'}; text-transform: uppercase;">${st.name}</span>${ringControlsHTML}`;
+
+            card.onclick = () => this.toggleStatus(st.id);
+            card.innerHTML = '<span style="font-size: 12px; font-weight: bold; color: ' + (active ? '#fff' : '#aaa') + '; text-transform: uppercase;">' + st.name + '</span>' + extraHTML;
             container.appendChild(card);
         });
     },
