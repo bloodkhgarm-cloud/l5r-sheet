@@ -571,10 +571,16 @@
             <div id="tech-categories-container"></div>
         </div>
     </details>
+        <!-- БЛОК БОЕВЫХ СТОЕК САМУРАЯ -->
+    <h2>Боевая Стойка</h2>
+    <div id="l5r-stances-container" style="display: flex; flex-direction: column; gap: 6px; margin-top: 12px; background: #222; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box;">
+        <!-- Сюда JavaScript автоматически добавит интерактивные стойки -->
+    </div>
+
             <h2>Состояние в бою</h2>
     <div class="status-box">
         <div class="status-title">
-            <span>Текущие Раны (Накопление)</span>
+            <span>Текущая усталость (Накопление)</span>
             <span><span id="curWounds">0</span> / <span id="maxWounds">0</span></span>
         </div>
         <div class="ring-controls" style="margin-bottom:8px; display: flex; align-items: center;">
@@ -592,6 +598,14 @@
             <div class="bar-bg"><div id="barStrife" class="bar-fill bar-strife" style="width: 0%;"></div></div>
             <button class="btn-ring" style="display: inline-block !important;" onclick="L5R.changeCombatStatus('strife', 1)">+</button>
         </div>
+                <!-- ТРЕКЕР СОСТОЯНИЙ В БОЮ -->
+        <div style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
+            <label style="color: #d4af37; font-weight: bold; margin-bottom: 8px;">🎭 Негативные Состояния:</label>
+            <div id="l5r-statuses-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; box-sizing: border-box;">
+                <!-- Сюда JavaScript автоматически добавит все кнопки состояний и списки колец -->
+            </div>
+        </div>
+
     </div> <!-- Конец status-box -->
 
     <!-- БЛОК ИНВЕНТАРЯ САМУРАЯ -->
@@ -733,7 +747,14 @@ const ITEMS_DATABASE = [
     { name: "Иглы для татуировок (Tattoo Needles)", type: "Личные вещи", desc: "Стоимость: 1 бу | Редкость: 4\nНабор профессиональных костяных или металлических игл. Обязателен для нанесения клановых и мистических татуировок." },
     { name: "Дорожная еда (Travel Rations)", type: "Личные вещи", desc: "Стоимость: 5 дзэни за порцию | Редкость: 1\nСухой паёк (рис, сушеная рыба). Одна порция утоляет голод самурая на один день пути и предотвращает Изнурение." },
     { name: "Зонтик (Umbrella)", type: "Личные вещи", desc: "Стоимость: 2 бу | Редкость: 4\nТрадиционный зонт из бамбука и промасленной бумаги. Защищает роскошные одежды от дождя и солнца, сохраняя статус в непогоду." },
-    { name: "Точильный камень (Whetstone)", type: "Личные вещи", desc: "Стоимость: 1 дзэни | Редкость: 1\nНебольшой брусок для правки лезвия. Позволяет самураю ухаживать за своим оружием и восстанавливать свойство Бритвенно-острое." }
+    { name: "Точильный камень (Whetstone)", type: "Личные вещи", desc: "Стоимость: 1 дзэни | Редкость: 1\nНебольшой брусок для правки лезвия. Позволяет самураю ухаживать за своим оружием и восстанавливать свойство Бритвенно-острое." },
+        // --- ПОПОЛНЕНИЕ: НЕДОСТАЮЩИЕ ЛИЧНЫЕ ВЕЩИ ---
+    { name: "Набор для предсказаний (Divination Kit)", type: "Личные вещи", desc: "Стоимость: 1 бу | Редкость: 4\nМонеты, палочки тысячелистника или кости оракула. Помогает считывать знамения при проверках Теологии." },
+    { name: "Музыкальный инструмент (Musical Instrument)", type: "Личные вещи", desc: "Стоимость: 1-5 бу | Редкость: 2-6\nБива, сякухати или кото. Требуется для исполнения традиционной музыки при проверках навыка Выступления." },
+    { name: "Стаканчик с игральными костями (Dice Cup)", type: "Личные вещи", desc: "Стоимость: 25 дзэни | Редкость: 2\nИспользуется для подпольных азартных игр в кости (Тё-Хан) при проверках навыка Игр через кольцо Воды." },
+    { name: "Набор для каллиграфии (Calligraphy Kit)", type: "Личные вещи", desc: "Стоимость: 1 бу | Редкость: 3\nБумага, тушь и кисти в изящной коробке. Позволяет полноценно использовать навык Композиции." },
+    { name: "Чайный набор переносной (Portable Tea Set)", type: "Личные вещи", desc: "Стоимость: 1 коку | Редкость: 6\nКомпактный набор из пиал, венчика и заварника. Необходим для проведения чайной церемонии во время отдыха." }
+
 
 ];
 
@@ -1193,6 +1214,11 @@ const TRAITS_DATABASE = [
         name: "Скверна Теневых Земель (Вода)",
         type: "Недостаток",
         desc: "Тип: проклятие, физический, духовный.\n\nЭффект: Вы Осквернены. Когда ваша кровь проливается (при ранении), вместо неё льётся гной. Любой, кто прикоснётся к нему, получает состояние Одержимый. Когда вы делаете проверку, чтобы исцелить других или приготовить еду (например, Медицина [Вода] для создания лекарства или Выживание [Вода] для добычи пищи), вы обязаны перебросить две кости с успехами (⭕) или взрывами (💥). При провале проверки вы получаете 1 очко Пустоты."
+    },
+    {
+        name: "Заклятый враг (Земля)",
+        type: "Недостаток",
+        desc: "Тип: межличностный.\n\nЭффект: Вы и Ведущий выбираете персонажа, который периодически вмешивается в ваши дела. Если враг погибает, вы обязаны устранить недостаток, найти нового врага или способ для покойного продолжать портить вам жизнь. Когда вы делаете проверку, чтобы оставаться рациональным в присутствии ненавистного человека (Учтивость [Земля] для вежливого диалога или Медитация [Земля] против его оскорблений), вы обязаны перебросить две кости с успехами (⭕) или взрывами (💥). При провале проверки вы получаете 1 очко Пустоты."
     },
     {
         name: "Шёпот жестокости (Земля)",
@@ -2351,10 +2377,44 @@ const TECH_DATABASE = [
 window.characterTechniques = [];
 window.currentWoundsCount = 0;
 window.currentStrifeCount = 0;
+// База данных негативных состояний персонажа
+const STATUSES_LIST = [
+    { id: 'possessed', name: 'ОДЕРЖИМЫЙ', hasRing: true },
+    { id: 'bleeding', name: 'КРОВОТЕЧЕНИЕ', hasRing: false },
+    { id: 'burning', name: 'ГОРЕНИЕ', hasRing: false },
+    { id: 'unstable', name: 'НЕСТАБИЛЬНЫЙ', hasRing: false },
+    { id: 'dazed', name: 'ОШЕЛОМЛЁННЫЙ', hasRing: false },
+    { id: 'disoriented', name: 'ДЕЗОРИЕНТИРОВАННЫЙ', hasRing: false },
+    { id: 'enraged', name: 'РАЗГНЕВАННЫЙ', hasRing: false },
+    { id: 'exhausted', name: 'ИСТОЩЁННЫЙ', hasRing: false },
+    { id: 'immobilized', name: 'ОБЕЗДВИЖЕННЫЙ', hasRing: false },
+    { id: 'incapacitated', name: 'НЕДЕЕСПОСОБНЫЙ', hasRing: false },
+    { id: 'dying', name: 'ПРИ СМЕРТИ [X РАУНДОВ]', hasRing: false },
+    { id: 'intoxicated', name: 'ОПЬЯНЁННЫЙ', hasRing: false },
+    { id: 'prone', name: 'РАСПЛАСТАННЫЙ', hasRing: false },
+    { id: 'silenced', name: 'БЕЗМОЛВИЕ', hasRing: false },
+    { id: 'unconscious', name: 'БЕССОЗНАТЕЛЬНЫЙ', hasRing: false },
+    { id: 'lightly_wounded', name: 'Легкораненый', hasRing: true },
+    { id: 'severely_wounded', name: 'Тяжелораненый', hasRing: true }
+];
+
+window.characterStatuses = {}; // Хранилище активных состояний
+window.characterStance = ''; // Хранилище текущей активной стойки
+
+// База данных боевых стоек персонажа (ОБЪЯВЛЕНА НАВЕРХУ)
+// База данных боевых стоек персонажа c правильными описаниями кубов (T)
+const STANCES_LIST = [
+    { id: 'air', name: 'СТОЙКА ВОЗДУХА', symbol: '💨', color: '#006064', desc: 'Враги добавляют +1 к целевому числу (ЦЧ) своих проверок против вас.' },
+    { id: 'earth', name: 'СТОЙКА ЗЕМЛИ', symbol: '⛰️', color: '#1b5e20', desc: 'Враги не могут потратить (⚙️) на то, чтобы ранить вас.' },
+    { id: 'fire', name: 'СТОЙКА ОГНЯ', symbol: '🔥', color: '#b71c1c', desc: 'При успешной проверке, вы можете посчитать все (🔥) как дополнительные успехи.' },
+    { id: 'water', name: 'СТОЙКА ВОДЫ', symbol: '💧', color: '#0d47a1', desc: 'Вы можете совершить дополнительное, но не повторяющееся действие, не требующее проверки.' },
+    { id: 'void', name: 'СТОЙКА ПУСТОТЫ', symbol: '🌌', color: '#4a148c', desc: 'Вы не получаете смятение от результатов (🔥) при проверке.' }
+];
 
 const L5R = {
     currentSlot: null,
     isLockMode: true,
+
     init: function() {
         this.currentSlot = null;
         let list = this.getCharacterList();
@@ -2369,7 +2429,75 @@ const L5R = {
         this.bindAutoSave();
     },
 
+    toggleStatus: function(id) {
+        if (!window.characterStatuses) window.characterStatuses = {};
+        window.characterStatuses[id] = !window.characterStatuses[id];
+        this.renderStatuses();
+        this.saveCharacter();
+    },
+
+    toggleStatusRing: function(id, ringId) {
+        if (!window.characterStatuses) window.characterStatuses = {};
+        const key = id + '_' + ringId;
+        window.characterStatuses[key] = !window.characterStatuses[key];
+        const rings = ['air', 'earth', 'fire', 'water', 'void'];
+        const hasAnyActive = rings.some(r => !!window.characterStatuses[id + '_' + r]);
+        window.characterStatuses[id] = hasAnyActive;
+        this.renderStatuses();
+        this.saveCharacter();
+    },
+
+    renderStatuses: function() {
+        const container = document.getElementById('l5r-statuses-container');
+        if (!container) return; container.innerHTML = '';
+        STATUSES_LIST.forEach(st => {
+            const active = !!window.characterStatuses[st.id];
+            const card = document.createElement('div');
+            card.style.cssText = `background: ${active ? '#5a1a1a' : '#2a2a2a'}; border: 1px solid ${active ? '#d4af37' : '#444'}; padding: 6px; border-radius: 6px; display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; user-select: none; text-align: center; ${st.hasRing ? 'grid-column: span 2;' : ''}`;
+            let ringControlsHTML = '';
+            if (st.hasRing) {
+                const rings = [{ id: 'air', label: '💨 Возд' }, { id: 'earth', label: '⛰️ Зем' }, { id: 'fire', label: '🔥 Огн' }, { id: 'water', label: '💧 Вод' }, { id: 'void', label: '🌌 Пуст' }];
+                ringControlsHTML = `<div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center;">`;
+                rings.forEach(r => {
+                    const isRingActive = !!(window.characterStatuses[st.id + '_' + r.id]);
+                    ringControlsHTML += `<button onclick="event.stopPropagation(); L5R.toggleStatusRing('${st.id}', '${r.id}');" style="background: ${isRingActive ? '#b71c1c' : '#111'}; color: #fff; border: 1px solid ${isRingActive ? '#d4af37' : '#555'}; padding: 3px 6px; font-size: 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">${r.label}</button>`;
+                });
+                ringControlsHTML += `</div>`;
+            }
+            card.onclick = st.hasRing ? null : () => this.toggleStatus(st.id);
+            card.innerHTML = `<span style="font-size: 11px; font-weight: bold; color: ${active ? '#fff' : '#aaa'}; text-transform: uppercase;">${st.name}</span>${ringControlsHTML}`;
+            container.appendChild(card);
+        });
+    },
+
+    selectStance: function(id) {
+        if (window.characterStance === id) { window.characterStance = ''; } else { window.characterStance = id; }
+        this.renderStances();
+        this.saveCharacter();
+    },
+
+    renderStances: function() {
+        const container = document.getElementById('l5r-stances-container');
+        if (!container) return; container.innerHTML = '';
+        STANCES_LIST.forEach(st => {
+            const active = window.characterStance === st.id;
+            const card = document.createElement('details');
+            card.style.cssText = `margin: 2px 0; border: 1px solid ${active ? st.color : '#444'}; border-radius: 6px; background: ${active ? st.color : '#1a1a1a'}; transition: all 0.2s; outline: none;`;
+            const summary = document.createElement('summary');
+            summary.style.cssText = 'cursor: pointer; color: #fff; padding: 10px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; user-select: none; list-style: none;';
+            summary.innerHTML = `<span>${st.symbol} ${st.name}</span> <span style="font-size: 10px; color: ${active ? '#fff' : '#aaa'};">${active ? 'АКТИВНА ▲' : 'ВЫБРАТЬ ▼'}</span>`;
+            summary.onclick = (e) => { e.preventDefault(); this.selectStance(st.id); };
+            const body = document.createElement('div');
+            body.style.cssText = `padding: 10px; background: #111; border-top: 1px solid ${active ? st.color : '#333'}; font-size: 12px; color: #bbb; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; white-space: pre-wrap;`;
+            body.innerText = st.desc;
+            card.appendChild(summary); card.appendChild(body);
+            if (active) card.setAttribute('open', 'true');
+            container.appendChild(card);
+        });
+    },
+
     getCharacterList: function() {
+
         try {
             const listJson = localStorage.getItem('l5r_character_list');
             if (!listJson) return [];
@@ -2433,9 +2561,14 @@ const L5R = {
         window.currentStrifeCount = 0;
         window.characterInventory = [];
         window.characterTechniques = [];
-        window.characterTraits = [];
+        window.characterTraits = [];        
+        // ПОЛНОЕ ИСПРАВЛЕНИЕ: Тотальное обнуление хранилища состояний вместе со всеми стихиями
+        window.characterStatuses = {};
+        this.renderStatuses();
+        window.characterStance = '';
+        this.renderStances();         
         if (document.getElementById('curVoidPoints')) document.getElementById('curVoidPoints').innerText = '1';
-                if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = '0';
+        if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = '0';
         if (document.getElementById('money-bu')) document.getElementById('money-bu').innerText = '0';
         if (document.getElementById('money-zeni')) document.getElementById('money-zeni').innerText = '0';
         if (document.getElementById('social-honor')) document.getElementById('social-honor').innerText = '30';
@@ -2510,6 +2643,8 @@ const L5R = {
             koku: document.getElementById('money-koku') ? document.getElementById('money-koku').innerText : '0',
             bu: document.getElementById('money-bu') ? document.getElementById('money-bu').innerText : '0',
             zeni: document.getElementById('money-zeni') ? document.getElementById('money-zeni').innerText : '0',
+            statuses: window.characterStatuses || {},
+            stance: window.characterStance || '',
             honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '50',
             glory: document.getElementById('social-glory') ? document.getElementById('social-glory').innerText : '30',
             status: document.getElementById('social-status') ? document.getElementById('social-status').innerText : '30'
@@ -2553,9 +2688,15 @@ const L5R = {
                 if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = pack.koku || '0';
         if (document.getElementById('money-bu')) document.getElementById('money-bu').innerText = pack.bu || '0';
         if (document.getElementById('money-zeni')) document.getElementById('money-zeni').innerText = pack.zeni || '0';
-        window.characterInventory = pack.inventory || [];
+                window.characterInventory = pack.inventory || [];
         this.renderInventory();
-                if (document.getElementById('social-honor')) document.getElementById('social-honor').innerText = pack.honor || '50';
+        
+        window.characterStatuses = pack.statuses || {}; // <-- ДОБАВЛЕНО ТУТ
+        this.renderStatuses();                           // <-- ДОБАВЛЕНО ТУТ для отрисовки при входе
+        window.characterStance = pack.stance || '';
+        this.renderStances();
+        
+        if (document.getElementById('social-honor')) document.getElementById('social-honor').innerText = pack.honor || '30';
         if (document.getElementById('social-glory')) document.getElementById('social-glory').innerText = pack.glory || '30';
         if (document.getElementById('social-status')) document.getElementById('social-status').innerText = pack.status || '30';
 
