@@ -1,4 +1,4 @@
-const CACHE_NAME = 'l5r-sheet-v6';
+const CACHE_NAME = 'l5r-sheet-v7';
 const ASSETS = [
     './',
     './index.html'
