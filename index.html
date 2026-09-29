@@ -69,8 +69,15 @@
             
             /* АДАПТАЦИЯ КОЛЕЦ И ХАРАКТЕРИСТИК */
             .ring-grid { grid-template-columns: 1fr; gap: 6px; }
-            .ring-card { padding: 8px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
-            .ring-name { margin-bottom: 0; font-size: 14px; }
+            .ring-card { 
+    padding: 10px 8px; 
+    display: flex; 
+    flex-direction: column; /* Выстраивает название и кнопки друг под другом */
+    align-items: center; 
+    text-align: center; }
+            .ring-name { 
+    margin-bottom: 6px; /* Создает отступ между текстом и кнопками */
+    font-size: 14px; }
             .btn-ring { width: 34px; height: 34px; font-size: 16px; }
             .ring-value { font-size: 18px; min-width: 20px; }
             .attr-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
@@ -102,10 +109,47 @@
             .skill-value { font-size: 14px; min-width: 16px; }
             .status-title { font-size: 12px; }
         }
-           
+                         /* ПОЛНАЯ ИЗОЛЯЦИЯ ПОЛЯ ШКОЛЫ В РЕЖИМЕ ИГРЫ */
+        .lock-mode #bio-school {
+            background: #2a2222 !important;
+            border-color: #d4af37 !important;
+            color: #d4af37 !important;
+            font-weight: bold;
+            cursor: pointer !important;
+            user-select: none !important;
+            pointer-events: auto !important; 
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: inset 0 0 5px rgba(212,175,55,0.2);
+            caret-color: transparent !important;
+        }
+        .lock-mode #bio-school:hover {
+            background: #3a2e2e !important;
+            box-shadow: 0 0 8px rgba(212,175,55,0.4);
+        }
+        /* Скрываем стрелочку datalist в режиме игры для всех браузеров */
+        .lock-mode #bio-school::-webkit-calendar-picker-indicator {
+            display: none !important;
+            opacity: 0 !important;
+        }
+        /* Управление видимостью полей биографии самурая */
+        .edit-only { display: block !important; }
+        .game-only { display: none !important; }
+
+        .lock-mode .edit-only { display: none !important; }
+        .lock-mode .game-only { display: block !important; }
+
+        /* Красивое золотое свечение школы в режиме игры */
+        #bio-school-text:hover {
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 8px rgba(212,175,55,0.4);
+            background: #3a2e2e !important;
+        }
+  
     </style>
 </head>
-<body onload="L5R.init();">
+<body>
 <div id="start-screen">
     <div class="welcome-box">
         <h1 style="margin-bottom: 5px; font-size: 22px;">Легенда Пяти Колец</h1>
@@ -126,28 +170,65 @@
     <h1>Лист Самурая (L5R 5e)</h1>
     <button id="modeToggleBtn" class="btn-mode-toggle" onclick="L5R.toggleMode()">🔒 Режим Игры (Нажмите для редактирования)</button>
     
-    <div class="input-group">
-        <label>Имя Персонажа</label>
-        <input type="text" id="bio-name" placeholder="Введите имя...">
-    </div>
-    
-    <div class="info-grid">
-        <div class="input-group"><label>Великий Клан</label><input type="text" id="bio-clan" placeholder="Клан..."></div>
-        <div class="input-group"><label>Школа самурая</label><input type="text" id="bio-school" placeholder="Школа..."></div>
-    </div>
-    
-        <div class="info-grid">
-        <div class="input-group"><label>Профессия (Роль)</label><input type="text" id="bio-role" placeholder="Сюгэндзя/Придворный..."></div>
-        <div class="input-group"><label>Ранг Школы</label><input type="text" id="bio-rank" placeholder="Ранг..."></div>
-    </div>
-    
-        <!-- СКРЫВАЕМАЯ СТРОКА: ИСТОРИЯ ПЕРСОНАЖА -->
-    <details style="margin-bottom: 12px; background: #222; border: 1px solid #444; border-radius: 6px; padding: 10px;">
-        <summary style="font-size: 11px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; user-select: none;">📜 Показать/скрыть историю самурая</summary>
-        <div class="input-group" style="margin-top: 10px; margin-bottom: 0;">
-            <textarea id="bio-history" placeholder="Запишите свиток вашей судьбы, предысторию или важные заметки..." rows="4" style="font-family: sans-serif; resize: vertical;"></textarea>
+        <!-- ЕДИНЫЙ БЛОК ДАННЫХ ПЕРСОНАЖА -->
+    <div style="background: #1e1e1e; border: 1px solid #444; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+        
+        <!-- Имя -->
+        <div class="input-group">
+            <label>Имя Персонажа</label>
+            <input type="text" id="bio-name" placeholder="Введите имя..." class="edit-only">
+            <div id="bio-name-text" class="game-only" style="padding: 10px; font-size: 16px; font-weight: bold; color: #fff; border-bottom: 1px dashed #444;"></div>
         </div>
-    </details>
+        
+                <!-- Клан и Школа -->
+        <div class="info-grid" style="margin-top: 10px;">
+            <div class="input-group">
+                <label>Великий Клан</label>
+                <input type="text" id="bio-clan" placeholder="Клан..." class="edit-only">
+                <div id="bio-clan-text" class="game-only" style="padding: 10px; background: #2a2a2a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; min-height: 38px; box-sizing: border-box;"></div>
+            </div>
+            <div class="input-group">
+                <label>Школа самурая</label>
+          <!-- Умный живой инпут с динамическими подсказками -->
+            <input type="text" id="bio-school" list="l5r-schools-suggestions" placeholder="Начните вводить школу..." class="edit-only" oninput="L5R.checkSchoolSearch(this.value)">
+            <datalist id="l5r-schools-suggestions"></datalist>
+
+                <div id="bio-school-text" onclick="L5R.openSchoolModal()" class="game-only" style="padding: 10px; background: #2a2222; border: 1px solid #d4af37; border-radius: 6px; color: #d4af37; font-size: 14px; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; min-height: 38px; box-sizing: border-box;"></div>
+            </div>
+        </div>
+        
+        <!-- Роль и Ранг (Полностью скрываются и блокируются в Режиме Игры) -->
+        <div class="info-grid" style="margin-top: 10px;">
+            <div class="input-group">
+                <label>Профессия (Роль)</label>
+                <input type="text" id="bio-role" placeholder="Сюгэндзя/Придворный..." class="edit-only">
+                <div id="bio-role-text" class="game-only" style="padding: 10px; background: #2a2a2a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; min-height: 38px; box-sizing: border-box;"></div>
+            </div>
+            <div class="input-group">
+                <label>Ранг Школы</label>
+                <input type="text" id="bio-rank" placeholder="Ранг..." class="edit-only">
+                <div id="bio-rank-text" class="game-only" style="padding: 10px; background: #2a2a2a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; text-align: center; font-weight: bold; min-height: 38px; box-sizing: border-box;"></div>
+            </div>
+        </div>
+
+                <!-- СВЕРНУТАЯ ИСТОРИЯ САМУРАЯ -->
+        <div class="input-group" style="margin-top: 15px;">
+            <details style="background: #222; border: 1px solid #444; border-radius: 6px; padding: 10px; box-sizing: border-box;">
+                <summary style="font-size: 11px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; user-select: none; outline: none;">📜 Показать/скрыть историю самурая</summary>
+                
+                <div style="margin-top: 10px;">
+                    <!-- Поле ввода (видно только в режиме правки) -->
+                    <div class="edit-only">
+                        <textarea id="bio-history" placeholder="Запишите свиток вашей судьбы, предысторию или важные заметки..." rows="4" style="font-family: sans-serif; resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
+                    </div>
+                    <!-- Игровой текст (виден строго в режиме игры) -->
+                    <div id="bio-history-text" class="game-only" style="padding: 10px; background: #151515; border: 1px dashed #444; border-radius: 6px; color: #ccc; font-size: 13px; white-space: pre-wrap; min-height: 38px; max-height: 200px; overflow-y: auto; box-sizing: border-box; width: 100%;"></div>
+                </div>
+            </details>
+        </div>
+
+    </div>
+
        
     <h2>Пять Колец (Подходы)</h2>
 
@@ -610,9 +691,36 @@
         </div>
     </div>
 </div>
+                  
+<!-- МОДАЛЬНОЕ ОКНО ПРОГРЕССА ШКОЛЫ -->
+<div id="school-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box;">
+    <div style="background: #1c1c1c; border: 2px solid #d4af37; border-radius: 12px; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 15px; box-shadow: 0 0 20px rgba(212,175,55,0.3); box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding-bottom: 8px; margin-bottom: 12px;">
+            <div id="modal-school-title" style="color: #d4af37; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Школа самурая</div>
+            <button onclick="L5R.closeSchoolModal()" style="background: #8b0000; color: white; border: none; border-radius: 4px; padding: 4px 10px; font-weight: bold; cursor: pointer; font-size: 14px;">❌</button>
+        </div>
+        
+        <div style="margin-bottom: 12px;">
+            <label style="color: #aaa; font-size: 10px; margin-bottom: 4px; display: block;">Выберите Ранг школы:</label>
+            <select id="modal-rank-select" onchange="L5R.renderSchoolTable()" style="background: #2a2a2a; color: white; border: 1px solid #444; padding: 8px; border-radius: 6px; width: 100%; font-size: 13px; outline: none;"></select>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; background: #111;">
+                <thead>
+                    <tr style="background: #2a2222; border-bottom: 2px solid #5a1a1a; color: #d4af37; text-transform: uppercase;">
+                        <th style="padding: 6px; border: 1px solid #333;">Прогресс</th>
+                        <th style="padding: 6px; border: 1px solid #333;">Тип</th>
+                    </tr>
+                </thead>
+                <tbody id="school-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
-    // ==========================================
+// ==========================================
 // БАЗА ДАННЫХ СНАРЯЖЕНИЯ И АРСЕНАЛА ДЛЯ ПОИСКА (L5R 5e)
 // ==========================================
 const ITEMS_DATABASE = [
@@ -703,6 +811,1655 @@ const ITEMS_DATABASE = [
 
 
 ];
+// ==========================================
+// ИСПРАВЛЕННАЯ БАЗА ДАННЫХ ПРОГРЕССИИ ШКОЛЫ ХИДА
+// ==========================================
+const SCHOOLS_DATABASE = {
+    "школа защитников хида [буси]": {
+        name: "Школа Защитников Хида [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Стиль стремительной лавины", type: "Техника" },
+                { name: "Честная оценка", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Труд (Labor)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ката 1–2 ранга", type: "Группа тех." },
+                { name: "Критерий отваги", type: "Техника" },
+                { name: "Скользкие манёвры", type: "Техника" }
+            ],
+            3: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Ката 1–3 ранга", type: "Группа тех." },
+                { name: "Стиль железа в горах", type: "Техника" },
+                { name: "Боевой клич", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Ката 1–4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Судьба самурая", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ката 1–5 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" },
+                { name: "Недвижимая рука мира", type: "Техника" }
+            ],
+            6: [
+                { name: "Гора не падёт", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа разведчиков хирума [буси, синоби]": {
+        name: "Школа Разведчиков Хирума [Буси, Синоби]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Пороговый барьер", type: "Техника" },
+                { name: "Скользкие манёвры", type: "Техника" }
+            ],
+            2: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Сюдзи Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Скрытность", type: "Техника" },
+                { name: "Захват Повелителя Хида", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1–3 ранга", type: "Группа тех." },
+                { name: "Смертельное жало", type: "Техника" },
+                { name: "Критерий отваги", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Ядовитое облако", type: "Техника" },
+                { name: "Стиль разбивающих волн", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1–5 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" },
+                { name: "Заглушающий удар", type: "Техника" }
+            ],
+            6: [
+                { name: "Удар убийцы", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа инженеров кайю [ремесленник, буси]": {
+        name: "Школа Инженеров Кайю [Ремесленник, Буси]",
+        ranks: {
+            1: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Земли 1 ранга", type: "Группа тех." },
+                { name: "Стиль проливного града", type: "Техника" },
+                { name: "Точность ястреба", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Ката 1–2 ранга", type: "Группа тех." },
+                { name: "Битва в разуме", type: "Техника" },
+                { name: "Ядовитое облако", type: "Техника" }
+            ],
+            3: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Сюдзи Воды 1-3 ранга", type: "Группа тех." },
+                { name: "Столп спокойствия", type: "Техника" },
+                { name: "Удар текущей воды", type: "Техника" }
+            ],
+            4: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Огня 1-4 ранга", type: "Группа тех." },
+                { name: "Раскол души", type: "Техника" },
+                { name: "Стиль железа в горах", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Земли 1-5 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Пронзить веер", type: "Техника" }
+            ],
+            6: [
+                { name: "Гениальный дизайн", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа очистителей куни [сюгендзя, буси]": {
+        name: "Школа Очистителей Куни [Сюгендзя, Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Земли 1 ранга", type: "Группа тех." },
+                { name: "Свяжи тень", type: "Техника" },
+                { name: "Кусающаяся сталь", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Воззвания Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Удар багровых листьев", type: "Техника" },
+                { name: "Символ Земли", type: "Техника" }
+            ],
+            3: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воды 1-3 ранга", type: "Группа тех." },
+                { name: "Восстань, Земля", type: "Техника" },
+                { name: "Стиль открытой руки", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Нефритовая гробница", type: "Техника" },
+                { name: "Удар текущей воды", type: "Техника" }
+            ],
+            5: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-5 ранга", type: "Группа тех." },
+                { name: "Землетрясение", type: "Техника" },
+                { name: "Раскол души", type: "Техника" }
+            ],
+            6: [
+                { name: "Очистить от зла", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа торговцев ясуки [придворный]": {
+        name: "Школа Торговцев Ясуки [Придворный]",
+        ranks: {
+            1: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Сюдзи Земли 1 ранга", type: "Группа тех." },
+                { name: "Притоки торговли", type: "Техника" },
+                { name: "Всё в шутку", type: "Техника" }
+            ],
+            2: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Торговля (Commerce/Trade)", type: "Навык" },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Сюдзи Огня 1-2 ранга", type: "Группа тех." },
+                { name: "Приливы и отливы", type: "Техника" },
+                { name: "Скользкие манёвры", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Торговля (Commerce/Trade)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Мореходство (Commerce)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-3 ранга", type: "Группа тех." },
+                { name: "Столп спокойствия", type: "Техника" },
+                { name: "Захват Повелителя Хида", type: "Техника" }
+            ],
+            4: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Сюдзи Воды 1-4 ранга", type: "Группа тех." },
+                { name: "Везде как свой", type: "Техника" },
+                { name: "Бравада", type: "Техника" }
+            ],
+            5: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Торговля (Commerce/Trade)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Сюдзи Пустоты 1-5 ранга", type: "Группа тех." },
+                { name: "Недвижимая рука мира", type: "Техника" },
+                { name: "Указ Леди Додзи", type: "Техника" }
+            ],
+            6: [
+                { name: "Сокровища Карпа", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа ремесленников асахина [сюгендзя, ремесленник]": {
+        name: "Школа Ремесленников Асахина [Сюгендзя, Ремесленник]",
+        ranks: {
+            1: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воздуха 1 ранга", type: "Группа тех." },
+                { name: "Путь к внутреннему покою", type: "Техника" },
+                { name: "Оценка ремесленника", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Воззвания Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Хватка дракона Воздуха", type: "Техника" },
+                { name: "Чайная церемония", type: "Техника" }
+            ],
+            3: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Огня 1-3 ранга", type: "Группа тех." },
+                { name: "Крылья Феникса", type: "Техника" },
+                { name: "Пар кошмаров", type: "Техника" }
+            ],
+            4: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воды 1-4 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Восстань, Воздух", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-5 ранга", type: "Группа тех." },
+                { name: "Вечно меняющиеся волны", type: "Техника" },
+                { name: "Везде как свой", type: "Техника" }
+            ],
+            6: [
+                { name: "Пробуждение дремлющего духа", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа железных воинов дайдодзи [буси]": {
+        name: "Школа Железных воинов Дайдодзи [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Стиль полумесяца", type: "Техника" },
+                { name: "Тактика каменной стены", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Земли 1-2 ранга", type: "Группа тех." },
+                { name: "Удар текущей воды", type: "Техника" },
+                { name: "Указ Леди Додзи", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Стиль разбивающих волн", type: "Техника" },
+                { name: "Приливы и отливы", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Судьба самурая", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Недвижимая рука мира", type: "Техника" },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Наступить на меч", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа дипломатов додзи [придворный]": {
+        name: "Школа Дипломатов Додзи [Придворный]",
+        ranks: {
+            1: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1 ранга", type: "Группа тех." },
+                { name: "Вежливость превыше всего", type: "Техника" },
+                { name: "Чайная церемония", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Ветер дует в обе стороны", type: "Техника" },
+                { name: "Оценка ремесленника", type: "Техника" }
+            ],
+            3: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Игры (Games)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Сюдзи Земли 1-3 ранга", type: "Группа тех." },
+                { name: "Царственная осанка", type: "Техника" },
+                { name: "Приливы и отливы", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Столп спокойствия", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Сюдзи Пустоты 1-5 ранга", type: "Группа тех." },
+                { name: "Везде как свой", type: "Техника" },
+                { name: "Недвижимая рука мира", type: "Техника" }
+            ],
+            6: [
+                { name: "Изящество леди", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа дуэлянтов какита [буси, ремесленник]": {
+        name: "Школа Дуэлянтов Какита [Буси, Ремесленник]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Удар иайдзюцу: Перекрёстный клинок", type: "Техника" },
+                { name: "Интонация", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Все искусства едины", type: "Техника" },
+                { name: "Удар грома", type: "Техника" }
+            ],
+            3: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-3 ранга", type: "Группа тех." },
+                { name: "Судьба самурая", type: "Техника" },
+                { name: "Удар пронзающий сердце", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Ката 1-4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Столп спокойствия", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Сюдзи Огня 1-5 ранга", type: "Группа тех." },
+                { name: "Раскол души", type: "Техника" },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Удар без раздумий", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа мистиков агася [сюгендзя]": {
+        name: "Школа Мистиков Агася [Сюгендзя]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Воззвания Земли 1 ранга", type: "Группа тех." },
+                { name: "Сердце дракона Воды", type: "Техника" },
+                { name: "Гадание", type: "Техника" }
+            ],
+            2: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Сила дракона Земли", type: "Техника" },
+                { name: "Критерий отваги", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Огня 1-3 ранга", type: "Группа тех." },
+                { name: "Восстань, Земля", type: "Техника" },
+                { name: "Земля становится небом", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Воззвания Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Вечно меняющиеся волны", type: "Техника" },
+                { name: "Восстань, Вода", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воды 1-5 ранга", type: "Группа тех." },
+                { name: "Землетрясение", type: "Техника" },
+                { name: "Прижигание раны", type: "Техника" }
+            ],
+            6: [
+                { name: "Экспериментируйте и адаптируйтесь", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа следователей кицуки [придворный, буси]": {
+        name: "Школа Следователей Кицуки [Придворный, Буси]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Сюдзи Огня 1 ранга", type: "Группа тех." },
+                { name: "Скользкие манёвры", type: "Техника" },
+                { name: "Честная оценка", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Все искусства едины", type: "Техника" },
+                { name: "Притворное открытие", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Земли 1-3 ранга", type: "Группа тех." },
+                { name: "Царственная осанка", type: "Техника" },
+                { name: "Битва в разуме", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Ката 1-4 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Бравада", type: "Техника" }
+            ],
+            5: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Сюдзи Огня 1-5 ранга", type: "Группа тех." },
+                { name: "Предложение волка", type: "Техника" },
+                { name: "Стиль разбивающих волн", type: "Техника" }
+            ],
+            6: [
+                { name: "Глаза предают сердце", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа адептов двух небес мирумото [буси]": {
+        name: "Школа Адептов Двух Небес Мирумото [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Удар иайдзюцу: Восходящий клинок", type: "Техника" },
+                { name: "Размешивание углей", type: "Техника" }
+            ],
+            2: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Удар пронзающий сердце", type: "Техника" },
+                { name: "Скользкие манёвры", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Столп спокойствия", type: "Техника" },
+                { name: "Общение с духами", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Сюдзи Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Стиль разбивающих волн", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Сердце Дракона", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "татуированный орден тогаси [монах]": {
+        name: "Татуированный Орден Тогаси [Монах]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Кихо Огня 1 ранга", type: "Группа тех." },
+                { name: "Путь землетрясения", type: "Техника" },
+                { name: "Честная оценка", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Кихо Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Стиль открытой руки", type: "Техника" },
+                { name: "Размешивание углей", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Кихо Воздуха 1-3 ранга", type: "Группа тех." },
+                { name: "Смертельное касание", type: "Техника" },
+                { name: "Все искусства едины", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Кихо Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Прикосновение дракона Пустоты", type: "Техника" },
+                { name: "Столп спокойствия", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Кихо Пустоты 1-5 ранга", type: "Группа тех." },
+                { name: "Ритуалы 1-5 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Кровь Дракона", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа командиров акодо [буси]": {
+        name: "Школа Командиров Акодо [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Стиль железного леса", type: "Техника" },
+                { name: "Честная оценка", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Боевой клич", type: "Техника" },
+                { name: "Молниеносный рейд", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Судьба самурая", type: "Техника" },
+                { name: "Критерий отваги", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Огня 1-4 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" },
+                { name: "Стиль исчезающего мира", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Земли 1-5 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Совершенный как Пустота", type: "Техника" }
+            ],
+            6: [
+                { name: "Последний урок Акодо", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа бардов икома [придворный]": {
+        name: "Школа Бардов Икома [Придворный]",
+        ranks: {
+            1: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Сюдзи Огня 1 ранга", type: "Группа тех." },
+                { name: "Скользкие манёвры", type: "Техника" },
+                { name: "Парящий порез", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Сюдзи Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Ослепительное представление", type: "Техника" },
+                { name: "Стиль вращающихся лезвий", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Земли 1-3 ранга", type: "Группа тех." },
+                { name: "Боевой клич", type: "Техника" },
+                { name: "Царственная осанка", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Столп спокойствия", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Сюдзи Пустоты 1-5 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Везде как свой", type: "Техника" }
+            ],
+            6: [
+                { name: "Гордость Льва", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа медиумов кицу [сюгендзя]": {
+        name: "Школа Медиумов Кицу [Сюгендзя]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Воззвания Воды 1 ранга", type: "Группа тех." },
+                { name: "Мужество Семи Громов", type: "Техника" },
+                { name: "Сердце дракона Воды", type: "Техника" }
+            ],
+            2: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-2 ранга", type: "Группа тех." },
+                { name: "Руки приливов", type: "Техника" },
+                { name: "Раздувание пламени", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Земли 1-3 ранга", type: "Группа тех." },
+                { name: "Восстань, Земля", type: "Техника" },
+                { name: "Приливы и отливы", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Ритуалы 1-4 ранга", type: "Группа тех." },
+                { name: "Гнев Казе-но-Ками", type: "Техника" },
+                { name: "Бравада", type: "Техника" }
+            ],
+            5: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Огня 1-5 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Везде как свой", type: "Техника" }
+            ],
+            6: [
+                { name: "Сила тысячи предков", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа берсерков мацу [буси]": {
+        name: "Школа Берсерков Мацу [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Рык Повелителя Акодо", type: "Техника" },
+                { name: "Тактика каменной стены", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Удар пронзающий сердце", type: "Техника" },
+                { name: "Раздувание пламени", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Стиль исчезающего мира", type: "Техника" },
+                { name: "Боевой клич", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Учтивость (Courtesy)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Ката 1-4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Бравада", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" },
+                { name: "Прижигание раны", type: "Техника" }
+            ],
+            6: [
+                { name: "Раздирающие челюсти Льва", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа хранителей знаний асако [придворный]": {
+        name: "Школа Хранителей знаний Асако [Придворный]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Игры (Games)", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Сюдзи Земли 1 ранга", type: "Группа тех." },
+                { name: "Стиль открытой руки", type: "Техника" },
+                { name: "Гадание", type: "Техника" }
+            ],
+            2: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-2 ранга", type: "Группа тех." },
+                { name: "Все искусства едины", type: "Техника" },
+                { name: "Чайная церемония", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Сюдзи Огня 1-3 ранга", type: "Группа тех." },
+                { name: "Столп спокойствия", type: "Техника" },
+                { name: "Приливы и отливы", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Сюдзи Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Очищающий дух", type: "Техника" },
+                { name: "Предложение волка", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Сюдзи Воды 1-5 ранга", type: "Группа тех." },
+                { name: "Неподвижные стихии", type: "Техника" },
+                { name: "Согнись с бурей", type: "Техника" }
+            ],
+            6: [
+                { name: "Невыносимый гений", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа элементалистов исава [сюгендзя]": {
+        name: "Школа Элементалистов Исава [Сюгендзя]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Воззвания Огня 1 ранга", type: "Группа тех." },
+                { name: "Танец времён года", type: "Техника" },
+                { name: "Обряд очищения", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Воззвания Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Ярость Осано-во", type: "Техника" },
+                { name: "Раздувание пламени", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-3 ранга", type: "Группа тех." },
+                { name: "Крылья Феникса", type: "Техника" },
+                { name: "Удар цунами", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Гнев Казе-но-Ками", type: "Техника" },
+                { name: "Восстань, Пламя", type: "Техника" }
+            ],
+            5: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Огня 1-5 ранга", type: "Группа тех." },
+                { name: "Землетрясение", type: "Техника" },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Мастер стихий", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа хранителей сиба [буси, придворный]": {
+        name: "Школа Хранителей Сиба [Буси, Придворный]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Вежливость превыше всего", type: "Техника" },
+                { name: "Размешивание углей", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Боевой клич", type: "Техника" },
+                { name: "Скользкие манёвры", type: "Техника" }
+            ],
+            3: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Сюдзи Воды 1-3 ранга", type: "Группа тех." },
+                { name: "Судьба самурая", type: "Техника" },
+                { name: "Критерий отваги", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Ката 1-4 ранга", type: "Группа тех." },
+                { name: "Недвижимая рука мира", type: "Техника" },
+                { name: "Прикосновение дракона Пустоты", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Сюдзи Земли 1-5 ранга", type: "Группа тех." },
+                { name: "Путь бескрайнего меча", type: "Техника" },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Стойка чести", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа хранителей святилищ кайто [монах]": {
+        name: "Школа Хранителей святилищ Кайто [Монах]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Воззвания Воздуха 1 ранга", type: "Группа тех." },
+                { name: "Свяжи тень", type: "Техника" },
+                { name: "Устремлённый как Воздух", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Хватка дракона Воздуха", type: "Техника" },
+                { name: "Гадание", type: "Техника" }
+            ],
+            3: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Воззвания Воды 1-3 ранга", type: "Группа тех." },
+                { name: "Стиль дыхания ветра", type: "Техника" },
+                { name: "Удар текущей воды", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Ката 1-4 ранга", type: "Группа тех." },
+                { name: "Восстань, Воздух", type: "Техника" },
+                { name: "Раскол души", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Огня 1-5 ранга", type: "Группа тех." },
+                { name: "Нефритовая гробница", type: "Техника" },
+                { name: "Пронзить веер", type: "Техника" }
+            ],
+            6: [
+                { name: "Демон, убирайся!", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа манипуляторов баюси [придворный]": {
+        name: "Школа Манипуляторов Баюси [Придворный]",
+        ranks: {
+            1: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1 ранга", type: "Группа тех." },
+                { name: "Раздувание пламени", type: "Техника" },
+                { name: "Вес долга", type: "Техника" }
+            ],
+            2: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Сюдзи Огня 1-2 ранга", type: "Группа тех." },
+                { name: "Ослепительное представление", type: "Техника" },
+                { name: "Стиль скрытой угрозы", type: "Техника" }
+            ],
+            3: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Сюдзи Воды 1-3 ранга", type: "Группа тех." },
+                { name: "Предложение волка", type: "Техника" },
+                { name: "Скрытность", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Сюдзи Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Везде как свой", type: "Техника" },
+                { name: "Смертельное жало", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Сюдзи Пустоты 1-5 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Прижигание раны", type: "Техника" }
+            ],
+            6: [
+                { name: "Маленькие истины", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа лазутчиков сёсуро [синоби, придворный]": {
+        name: "Школа Лазутчиков Сёсуро [Синоби, Придворный]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Стиль скрытой угрозы", type: "Техника" },
+                { name: "Скрытность", type: "Техника" }
+            ],
+            2: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-2 ранга", type: "Группа тех." },
+                { name: "Шёпот Повелителя Баюси", type: "Техника" },
+                { name: "Ядовитое облако", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Бравада", type: "Техника" },
+                { name: "Ослепительное представление", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Заглушающий удар", type: "Техника" },
+                { name: "Судьба самурая", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Везде как свой", type: "Техника" },
+                { name: "Прижигание раны", type: "Техника" }
+            ],
+            6: [
+                { name: "Тихий Финал", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа иллюзионистов соси [сюгендзя, придворный, синоби]": {
+        name: "Школа Иллюзионистов Соси [Сюгендзя, Придворный, Синоби]",
+        ranks: {
+            1: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воздуха 1 ранга", type: "Группа тех." },
+                { name: "Маска ветра", type: "Техника" },
+                { name: "Скрытность", type: "Техника" }
+            ],
+            2: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Пар кошмаров", type: "Техника" },
+                { name: "Шёпот Повелителя Баюси", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Игры (Games)", type: "Навык" },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-3 ранга", type: "Группа тех." },
+                { name: "Ложное Царство Духов Лисы", type: "Техника" },
+                { name: "Ядовитое облако", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Сюдзи Земли 1-4 ранга", type: "Группа тех." },
+                { name: "Смертельное жало", type: "Техника" },
+                { name: "Восстань, Воздух", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-5 ранга", type: "Группа тех." },
+                { name: "Везде как свой", type: "Техника" },
+                { name: "Заглушающий удар", type: "Техника" }
+            ],
+            6: [
+                { name: "Мир Теней", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа мастеров оберегов ёго [сюгендзя]": {
+        name: "Школа Мастеров Оберегов Ёго [Сюгендзя]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Воззвания Земли 1 ранга", type: "Группа тех." },
+                { name: "Вежливость превыше всего", type: "Техника" },
+                { name: "Путь к внутреннему покою", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Приливы и отливы", type: "Техника" },
+                { name: "Объятия Кенро-Дзи-Дзин", type: "Техника" }
+            ],
+            3: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Огня 1-3 ранга", type: "Группа тех." },
+                { name: "Стиль открытой руки", type: "Техника" },
+                { name: "Земля становится небом", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Скрытность", type: "Техника" },
+                { name: "Восстань, Вода", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Сюдзи Земли 1-5 ранга", type: "Группа тех." },
+                { name: "Смертельное жало", type: "Техника" },
+                { name: "Нефритовая гробница", type: "Техника" }
+            ],
+            6: [
+                { name: "Заковать в чернила", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа купцов идэ [придворный]": {
+        name: "Школа Купцов Идэ [Придворный]",
+        ranks: {
+            1: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Сюдзи Воздуха 1 ранга", type: "Группа тех." },
+                { name: "Притворное открытие", type: "Техника" },
+                { name: "Точность ястреба", type: "Техника" }
+            ],
+            2: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Торговля (Commerce/Trade)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Воды 1-2 ранга", type: "Группа тех." },
+                { name: "Приливы и отливы", type: "Техника" },
+                { name: "Скорость Госпожи Синдзё", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Торговля (Commerce/Trade)", type: "Навык" },
+                { name: "Игры (Games)", type: "Навык" },
+                { name: "Сюдзи Земли 1-3 ранга", type: "Группа тех." },
+                { name: "Столп спокойствия", type: "Техника" },
+                { name: "Все искусства едины", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Эстетика (Aesthetics)", type: "Навык" },
+                { name: "Боев. искусства [Дальний бой]", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Сюдзи Огня 1-4 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Царственная осанка", type: "Техника" }
+            ],
+            5: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Игры (Games)", type: "Навык" },
+                { name: "Сюдзи Пустоты 1-5 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Недвижимая рука мира", type: "Техника" }
+            ],
+            6: [
+                { name: "Друг в каждом городе", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа мастеров мейсёдо иути [сюгендзя, ремесленник]": {
+        name: "Школа Мастеров Мейсёдо Иути [Сюгендзя, Ремесленник]",
+        ranks: {
+            1: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Воззвания Воды 1 ранга", type: "Группа тех." },
+                { name: "Симпатические энергии", type: "Техника" },
+                { name: "Обряд очищения", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Дизайн (Design)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Воззвания Земли 1-2 ранга", type: "Группа тех." },
+                { name: "Руки приливов", type: "Техника" },
+                { name: "Оценка ремесленника", type: "Техника" }
+            ],
+            3: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ритуалы 1-3 ранга", type: "Группа тех." },
+                { name: "Восстань, Земля", type: "Техника" },
+                { name: "Ослепительное представление", type: "Техника" }
+            ],
+            4: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Воззвания Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" },
+                { name: "Судьба самурая", type: "Техника" }
+            ],
+            5: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Сюдзи Земли 1-5 ранга", type: "Группа тех." },
+                { name: "Клинок души", type: "Техника" },
+                { name: "Вечно меняющиеся волны", type: "Техника" }
+            ],
+            6: [
+                { name: "Освобожденные духи", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "школа завоевателей мото [буси]": {
+        name: "Школа Завоевателей Мото [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Стиль полумесяца", type: "Техника" },
+                { name: "Размешивание углей", type: "Техника" }
+            ],
+            2: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Боев. искусства [Безоружный бой]", type: "Навык" },
+                { name: "Сюдзи Огня 1-2 ранга", type: "Группа тех." },
+                { name: "Удар пронзающий сердце", type: "Техника" },
+                { name: "Стиль скрытой угрозы", type: "Техника" }
+            ],
+            3: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Бравада", type: "Техника" },
+                { name: "Ослепительное представление", type: "Техника" }
+            ],
+            4: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Боев. искусства [Стрельба]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Воды 1-4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Стиль разбивающих волн", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Прижигание раны", type: "Техника" },
+                { name: "Везде как свой", type: "Техника" }
+            ],
+            6: [
+                { name: "Очищающий сирокко", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа наездников синдзё [буси, придворный]": {
+        name: "Школа Наездников Синдзё [Буси, Придворный]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Торговля (Commerce/Trade)", type: "Навык" },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Земли 1 ранга", type: "Группа тех." },
+                { name: "Стиль проливного града", type: "Техника" },
+                { name: "Интонация", type: "Техника" }
+            ],
+            2: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Придворный этикет (Courtesy)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Боев. искусства [Стрельба]", type: "Навык" },
+                { name: "Ката 1-2 ранга", type: "Группа тех." },
+                { name: "Удар текущей воды", type: "Техника" },
+                { name: "Ослепительное представление", type: "Техника" }
+            ],
+            3: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Стрельба]", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Воды 1-3 ранга", type: "Группа тех." },
+                { name: "Стиль разбивающих волн", type: "Техника" },
+                { name: "Удар багровых листьев", type: "Техника" }
+            ],
+            4: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1-4 ранга", type: "Группа тех." },
+                { name: "Согнись с бурей", type: "Техника" },
+                { name: "Бравада", type: "Техника" }
+            ],
+            5: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Правительство (Government)", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи Огня 1-5 ранга", type: "Группа тех." },
+                { name: "Пронзить веер", type: "Техника" },
+                { name: "Подъём души", type: "Техника" }
+            ],
+            6: [
+                { name: "Я всегда вернусь", type: "Мастерская способность" }
+            ]
+        }
+    },
+    "школа боевых дев утаку [буси]": {
+        name: "Школа Боевых Дев Утаку [Буси]",
+        ranks: {
+            1: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Кузнечное дело (Smithing)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Скорость Госпожи Синдзё", type: "Техника" },
+                { name: "Решимость придворного", type: "Техника" }
+            ],
+            2: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Земли 1-2 ранга", type: "Группа тех." },
+                { name: "Удар грома", type: "Техника" },
+                { name: "Стиль стремительной лавины", type: "Техника" }
+            ],
+            3: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Теология (Theology)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Столп спокойствия", type: "Техника" },
+                { name: "Критерий отваги", type: "Техника" }
+            ],
+            4: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Боев. искусства [Ближний бой]", type: "Навык" },
+                { name: "Тактика (Tactics)", type: "Навык" },
+                { name: "Сюдзи Воздуха 1-4 ранга", type: "Группа тех." },
+                { name: "Раскол души", type: "Техника" },
+                { name: "Стиль дыхания ветра", type: "Техника" }
+            ],
+            5: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Культура (Culture)", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Подъём души", type: "Техника" },
+                { name: "Согнись с бурей", type: "Техника" }
+            ],
+            6: [
+                { name: "Ощущение бриза", type: "Мастерская способность" }
+            ]
+        }
+    }    ,
+    "мирской путь ронина [буси, придворный]": {
+        name: "Мирской Путь Ронина [Буси, Придворный]",
+        ranks: {
+            1: [
+                { name: "Трудовые навыки", type: "Группа нав." },
+                { name: "Физическая подготовка (Fitness)", type: "Навык" },
+                { name: "Боев. искусства [Выберите одно]", type: "Навык" },
+                { name: "Выступление (Performance)", type: "Навык" },
+                { name: "Ката 1 ранга", type: "Группа тех." },
+                { name: "Стиль открытой руки", type: "Техника" },
+                { name: "Мелководье", type: "Техника" }
+            ],
+            2: [
+                { name: "Боевые навыки", type: "Группа нав." },
+                { name: "Командование (Command)", type: "Навык" },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Медицина (Medicine)", type: "Навык" },
+                { name: "Сюдзи 1-2 ранга", type: "Группа тех." },
+                { name: "Все искусства едины", type: "Техника" },
+                { name: "Стиль железного леса", type: "Техника" }
+            ],
+            3: [
+                { name: "Социальные навыки", type: "Группа нав." },
+                { name: "Боев. искусства [Выберите одно]", type: "Навык" },
+                { name: "Чувства (Sentiment)", type: "Навык" },
+                { name: "Жульничество (Skulduggery)", type: "Навык" },
+                { name: "Ката 1-3 ранга", type: "Группа тех." },
+                { name: "Судьба самурая", type: "Техника" },
+                { name: "Ослепительное представление", type: "Техника" }
+            ],
+            4: [
+                { name: "Ремесленные навыки", type: "Группа нав." },
+                { name: "Работа (Labor)", type: "Навык" },
+                { name: "Боев. искусства [Выберите одно]", type: "Навык" },
+                { name: "Выживание (Survival)", type: "Навык" },
+                { name: "Сюдзи 1-4 ранга", type: "Группа тех." },
+                { name: "Совершенный как Пустота", type: "Техника" },
+                { name: "Удар багровых листьев", type: "Техника" }
+            ],
+            5: [
+                { name: "Учёные навыки", type: "Группа нав." },
+                { name: "Композиция (Composition)", type: "Навык" },
+                { name: "Боев. искусства [Выберите одно]", type: "Навык" },
+                { name: "Медитация (Meditation)", type: "Навык" },
+                { name: "Ката 1-5 ранга", type: "Группа тех." },
+                { name: "Везде как свой", type: "Техника" },
+                { name: "Прижигание раны", type: "Техника" }
+            ],
+            6: [
+                { name: "Бездонный океан", type: "Мастерская способность" }
+            ]
+        }
+    }
+    
+};
 
 window.characterInventory = [];
 
@@ -1105,7 +2862,8 @@ const TRAITS_DATABASE = [
     },
     {
         name: "Потерянные воспоминания (Пустота)",
-        type: "Ментальный, шрам.\n\nЭффект: Часть вашей жизни стерта из памяти, но навыки того периода сохранились. Когда вы выполняете проверку, чтобы вспомнить информацию, полученную в забытый период, или осознать его последствия (например, Культура [Пустота], чтобы интуитивно понять поведение в ситуации, связанной с забытым прошлым, или Медитация [Пустота] для анализа своих прошлых решений), вы обязаны перебросить две кости с успехами (⭕) или взрывными успехами (💥). При провале броска вы получаете 1 очко Пустоты."
+        type: "Недостаток",
+        desc: "Ментальный, шрам.\n\nЭффект: Часть вашей жизни стерта из памяти, но навыки того периода сохранились. Когда вы выполняете проверку, чтобы вспомнить информацию, полученную в забытый период, или осознать его последствия (например, Культура [Пустота], чтобы интуитивно понять поведение в ситуации, связанной с забытым прошлым, или Медитация [Пустота] для анализа своих прошлых решений), вы обязаны перебросить две кости с успехами (⭕) или взрывными успехами (💥). При провале броска вы получаете 1 очко Пустоты."
     },
     {
         name: "Изуродованная рука (Огонь)",
@@ -2318,7 +4076,165 @@ const TECH_DATABASE = [
         name: "Подъём души Ранг 5",
         type: "Сюдзи",
         desc: "Активация: Когда вы совершаете проверку Социального навыка (Пустота) или Теологии (Пустота), нацеленную на одного или нескольких персонажей, вы можете потратить (⚙️) следующим образом:\nПустота (⚙️)+: Удалите одно из следующих состояний у одной цели за каждую (⚙️) потраченную таким образом: Одержимость, Разгневанность, Истощение, Отравление или Бессознательное."
+    },
+    {
+        name: "Гора не падёт",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Защитников Хида).\n\nВ начале вашего хода вы можете потратить 1 очко Пустоты. Если вы это сделаете, игнорируйте все ваши условия, местность и негативные постоянные эффекты техник и способностей. Не применяйте свои недостатки к проверкам. Если вы умрёте, вы вместо этого цепляетесь за жизнь на несколько секунд дольше (но всё равно умираете, когда эффект заканчивается). Этот эффект сохраняется до конца вашего следующего хода."
+    },
+    {
+        name: "Удар убийцы",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Разведчиков Хирума).\n\nУвеличьте силу критических ударов, которые вы наносите по целям с фигурой 3 или больше, на величину ранга Выживания."
+    },
+    {
+        name: "Гениальный дизайн",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Инженеров Кайю).\n\nКогда вы создаете предмет, вы можете добавить или удалить одно качество предмета. Вы должны описать ведущему, как предмет обладает (или не обладает) качеством, и ведущий является окончательным судьей в отношении целесообразности добавления (или вычитания) качеств."
+    },
+    {
+        name: "Очистить от зла",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Очистителей Куни).\n\nОдин раз за игровую сессию вы можете потратить 1 очко Пустоты, чтобы использовать воззвание против всех нечестивых, которых вы видите. Вместо того, чтобы воздействовать на свои обычные цели, следующая техника воззвания, которую вы выполняете, нацелена на каждое Оскверненное существо в пределах досягаемости."
+    },
+    {
+        name: "Сокровища Карпа",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Торговцев Ясуки).\n\nОдин раз за игровую сессию вы можете отдать один предмет, который у вас есть, чтобы уменьшить ЦЧ следующей проверки социального навыка, которую вы делаете, на сумму, равную редкости предмета. За каждое очко, которое уменьшает ЦЧ ниже 1, добавьте к оставленным черным костям символ (⚙️) к результатам проверки."
+    },
+    {
+        name: "Пробуждение дремлющего духа",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Ремесленников Асахина).\n\nОдин раз за игровую сессию в качестве простоя вы можете сделать проверку с ЦЧ 4 Ремесленного навыка (Пустота), чтобы пробудить дух предмета. Если вам это удастся, до конца игрового сеанса он становится немуранай (стр. 307) с запечатанным воззванием по вашему выбору на основе истории предмета. За ведущим остается окончательное решение по поводу воззвания, выбранного таким образом."
+    },
+    {
+        name: "Наступить на меч",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Железных воинов Дайдодзи).\n\nКогда вы используете действие Защита, вместо одного персонажа вы можете выбрать для защиты несколько на расстоянии меньшем или равном вашему рангу Боевых искусств [Безоружный бой]."
+    },
+    {
+        name: "Изящество леди",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Дипломатов Додзи).\n\nОдин раз за сцену вы можете потратить 1 очко Пустоты, чтобы уменьшить ваше смятение до 0. Когда вы это сделаете, каждый дружественный персонаж в сцене может уменьшить смятение на ваш ранг Чести."
+    },
+    {
+        name: "Удар без раздумий",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Дуэлянтов Какита).\n\nОдин раз за сцену, в качестве действия Атака и Перемещение, вы можете сделать проверку Боевых искусств [Ближний бой] (Пустота), нацеливаясь на одного персонажа в пределах дистанции 2–3, используя катану в ножнах или вакидзаси в ножнах. ЦЧ этой проверки равен бдительности вашей цели. Вы немедленно перемещаетесь на дистанцию 1 от своей цели и достаете оружие, которое вы использовали. Если проверка успешна, ваша цель получит критическое попадание с силой, равной смертоносности вашего оружия плюс ваши бонусные успехи.\n\n⚙️+: один персонаж по вашему выбору в пределах дистанции 0–2 от вашей цели за каждую (⚙️), потраченную таким образом, получает состояние Ошеломления и Дезориентации.\n\n(⚙️⚙️)+: Считайте максимальную дальность действия этой техники на 1 больше за каждые (⚙️⚙️), потраченные таким образом."
+    },
+    {
+        name: "Экспериментируйте и адаптируйтесь",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Мистиков Агася).\n\nУвеличьте свое сверхъестественное сопротивление против воззваний Воздуха, Земли, Огня и Воды на уровень, равный рангу Теологии. После того, как другой персонаж применит на вас воззвание Воздуха, Земли, Огня или Воды, вы можете потратить 1 очко Пустоты, чтобы немедленно также применить это воззвание, even если вы его не изучили."
+    },
+    {
+        name: "Глаза предают сердце",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Следователей Кицуки).\n\nОдин раз за сцену при проверке навыков для расследования вы можете потратить (⚙️) следующим образом:\n\n⚙️+: вы можете зарезервировать одну выпавшую кость за каждую (⚙️) потраченную таким образом. В следующий раз, когда вы выполните проверку, чтобы взаимодействовать с человеком или предметом, который вы расследовали (например, проверка, нацеленная на этого человека или проверка на использование этого объекта), вы можете добавить любое количество этих зарезервированных костей в качестве оставленных костей. Затем удалите все неиспользованные зарезервированные кости."
+    },
+    {
+        name: "Сердце Дракона",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Адептов Двух Небес Мирумото).\n\nОдин раз за раунд при выполнении проверки действия Атака вы можете потратить (⚙️) следующим образом:\n\n⚙️: выполнить действие Нападение подготовленным оружием, которое вы не использовали для действия Атака на этом ходу."
+    },
+    {
+        name: "Кровь Дракона",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Татуированного Ордена Тогаси).\n\nОдин раз за сцену, когда вы получаете выгоду от эффекта усиления кихо, связанного с одной из ваших татуировок, при активации другого кихо вы можете потратить 1 очко Пустоты. Если вы это сделаете, вы можете сохранить оба эффекта улучшения до конца сцены или до тех пор, пока не активируете еще одно кихо."
+    },
+    {
+        name: "Последний урок Акодо",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Командиров Акодо).\n\nОдин раз за игровую сессию, после того, как вы провалили проверку во время схватки или массового сражения, вы можете повторить попытку проверки с ЦЧ 1."
+    },
+    {
+        name: "Гордость Льва",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Бардов Икома).\n\nОдин раз за игровую сессию в качестве действия Поддержки вы можете попытаться убедить всех присутствующих в сцене в славной репутации одного персонажа, при необходимости приукрашивая правду, выполняя проверку с ЦЧ 5 Выступление (Огонь), нацеленную на одного персонажа. ЦЧ этой проверки — 6, если вы нацеливаетесь на себя, и 4, если вы нацеливаетесь на другого персонажа Клана Льва. Если вам это удастся, уменьшите ЦЧ всех проверок социального навыка персонажа на 3 до конца сцены и ЦЧ всех остальных проверок персонажа на 1."
+    },
+    {
+        name: "Сила тысячи предков",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Медиумов Кицу).\n\nОдин раз за игровую сессию, в качестве действия Поддержки, вы можете призвать дух предка, который овладеет вами до конца сцены. В то время как вы одержимы, вы считаете себя Потусторонним существом и используете профиль предка. Ваш персонаж не помнит, сколько времени он провел в состоянии одержимого."
+    },
+    {
+        name: "Раздирающие челюсти Льва",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Берсерков Мацу).\n\nОдин раз за раунд, выполняя проверку действия Атаки в Разгневанном состоянии, вы можете потратить 1 очко Пустоты, чтобы повернуть каждую оставленную кость, содержащую (⭕), на результат (💥)."
+    },
+    {
+        name: "Невыносимый гений",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Хранителей знаний Асако).\n\nПосле того, как вы успешно пройдете проверку, чтобы получить или запомнить информацию, вы можете потратить 1 очко Пустоты и выбрать любое количество персонажей, с которыми вы можете общаться. Вы должны описать, как полученные знания помогают каждому выбранному вами персонажу. Каждый из этих персонажей уменьшает ЦЧ своей следующей проверки на 1 (минимум до 1) и получает 1 смятение."
+    },
+    {
+        name: "Мастер стихий",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Элементалистов Исава).\n\nОдин раз за раунд после выполнения воззвания вы можете потратить 1 очко Пустоты, чтобы переключиться на любую другую стойку и выполнить другое воззвание, которое не имеет общих типов действий с предыдущим (атака, поддержка и т.д.)."
+    },
+    {
+        name: "Стойка чести",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Хранителей Сиба).\n\nВ конце своего хода вы можете потратить 1 очко Пустоты, чтобы подготовиться к отражению наступающих противников; этот эффект сохраняется до начала вашего следующего хода. Когда враг входит в зону действия одного из ваших подготовленных видов оружия, вы можете немедленно сделать удар, используя это оружие и нацеливаясь на этого врага; если вам это удастся, цель получает состояние Паралича в дополнение к любым другим эффектам."
+    },
+    {
+        name: "Демон, убирайся!",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Хранителей святилищ Кайто).\n\nВ качестве действия вы можете сделать проверку Медитации (Пустота) с ЦЧ 3, потянув за тетиву лука, которым вы владеете, нацеливаясь на каждое Потустороннее существо в пределах диапазона, равного вашему рангу в Медитации. Если вы добьетесь успеха, каждая цель получит Смятение в количестве, равном вашему рангу в Медитации, плюс ваши бонусные успехи.\n\n⚙️: Каждая цель должна сопротивляться с помощью проверки Медитации (Пустота) с ЦЧ 3 и в случае неудачи следует рассматривать ее физическое и сверхъестественное сопротивление как 0. Этот эффект сохраняется до конца сцены."
+    },
+    {
+        name: "Маленькие истины",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Манипуляторов Баюси).\n\nКогда вы выполняете проверку, нацеленную на другого персонажа, к которому применимо одно из ваших преимуществ или недостатков, вы можете выбрать другое преимущество или недостаток, которые имеют общий тип с вашим. Если у неё нет четких доказательств обратного, цель приходит к убеждению, что у вас есть преимущество или недостаток, которые вы выбрали, вместо того, которое у вас есть на самом деле. Если цель пытается воспользоваться или использовать это ложное преимущество или недостаток, её проверка автоматически засчитывается как неудачная с недобором 3. Цель получает 3 Смятения и Дезориентированное состояние."
+    },
+    {
+        name: "Тихий Финал",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Лазутчиков Сёсуро).\n\nВ качестве действия Атаки и Перемещения вы можете выполнить проверку Боевых искусств [Безоружный бой] с ЦЧ 4 (Воздух), нацеленную на любое количество приспешников ПВ в пределах дистанции 0-4. Если вам это удастся во время повествовательной сцены, вы бесшумно убьете все цели в течение нескольких минут. Если вы добьетесь успеха во время сцены конфликта, в конце каждого из ваших ходов вы можете тихо убить одну из этих целей в пределах дистанции 0-2 (в дополнение к другим вашим действиям)."
+    },
+    {
+        name: "Мир Теней",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Иллюзионистов Соси).\n\nВы можете потратить 1 очко Пустоты, чтобы попытаться установить, что что-то в сцене все это время было вашей иллюзией. Это может быть объект, образ человека или другое иллюзорное явление, которое вы могли бы вызвать с помощью воззвания. Вы должны сделать проверку, чтобы вызвать эту иллюзию с помощью воззвания, с корректировкой ЦЧ для правдоподобия, определяемого ведущим. Если вам это удастся, вы обнаружите, что выбранная вами вещь на самом деле является иллюзией, которую соткали вы. Если вы потерпите неудачу, ваш персонаж явно не думал создавать иллюзию — объект такой, каким он кажется."
+    },
+    {
+        name: "Заковать в чернила",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Мастеров Оберегов Ёго).\n\nОдин раз за сцену, когда на вас нацелена техника воззвания или махо, вы можете защититься с помощью проверки Композиции с ЦЧ 4. Если вам это удастся, вы поглощаете воззвание или махо, сводя на нет все его эффекты и создавая оберег, содержащий его (см. стр. 190)."
+    },
+    {
+        name: "Друг в каждом городе",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Купцов Идэ).\n\nВо время сцены простоя в любом месте обитания человека вы можете сделать проверку Торговли с ЦЧ 4 (Вода), чтобы найти торговца, с которым вы (или ваши родственники) вели дела. Если вам это удастся, вы найдете этого человека и получите преимущество Союзник (см. стр. 101), что предрасполагает его к тому, чтобы помогать вам различными способами."
+    },
+    {
+        name: "Освобожденные духи",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Мастеров Мейсёдо Иути).\n\nВ конце своего хода вы можете потратить 1 или более очков Пустоты, чтобы высвободить внутренние силы в количестве, равном числу ваших талисманов мэйсёдо, уничтожив эти талисманы и освободив находящиеся внутри сущности. Вы можете немедленно выполнить каждое из воззваний, для которых были созданы талисманы, уменьшив ЦЧ на 3."
+    },
+    {
+        name: "Очищающий сирокко",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Завоевателей Мото).\n\nОдин раз за раунд, после того, как вы нанесете недееспособное состояние цели (или победите ПВ-приспешника), вы можете совершить действие Нападения по другой цели."
+    },
+    {
+        name: "Я всегда вернусь",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Наездников Синдзё).\n\nОдин раз за игровую встречу вы можете позвать своего коня. В начале следующего раунда ваша лошадь прибывает, независимо от каких-либо препятствий, которые обычно могли бы помешать ей добраться до вашего местоположения. Если ваш конь недавно был убит, его дух вселится в ближайшую к вам лошадь и придет вам на помощь, несмотря ни на что, такова его преданность вам."
+    },
+    {
+        name: "Ощущение бриза",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Школы Боевых Дев Утаку).\n\nОдин раз за раунд, после защиты от урона, вы можете переместиться на 1 диапазон дистанции и перейти в другую стойку."
+    },
+    {
+        name: "Бездонный океан",
+        type: "Техника школы",
+        desc: "Мастерская способность (6 ранг Мирского Пути Ронина).\n\nВы можете улучшить свои дополнительные навыки пути школы до 6-го ранга (таким образом, вы платите 12 очков опыта за навык, повышенный с 5-го до 6-го ранга)."
     }
+
+
+
 
 ];
 
@@ -2486,15 +4402,17 @@ const L5R = {
     },
 
     getCharacterList: function() {
-
         try {
             const listJson = localStorage.getItem('l5r_character_list');
             if (!listJson) return [];
             const parsed = JSON.parse(listJson);
             return Array.isArray(parsed) ? parsed : [];
         } catch (e) {
-            localStorage.setItem('l5r_character_list', JSON.stringify([]));
-            return [];
+            // Защита от блокировки памяти CodePen: создаем временного самурая для теста
+            if (!window.temporaryL5RList) {
+                window.temporaryL5RList = [{ id: 'l5r_char_default', name: 'Исидо Окацу' }];
+            }
+            return window.temporaryL5RList;
         }
     },
     renderStartScreenList: function() {
@@ -2556,7 +4474,7 @@ const L5R = {
         this.renderStatuses();
         window.characterStance = '';
         this.renderStances();         
-        if (document.getElementById('curVoidPoints')) document.getElementById('curVoidPoints').innerText = '1';
+        if (document.getElementById('curVoidPoints')) document.getElementById('curVoidPoints').innerText = '0';
         if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = '0';
         if (document.getElementById('money-bu')) document.getElementById('money-bu').innerText = '0';
         if (document.getElementById('money-zeni')) document.getElementById('money-zeni').innerText = '0';
@@ -2651,8 +4569,15 @@ const L5R = {
         }
     },        
     
-        loadCharacter: function() {
-        const dataJson = localStorage.getItem(this.currentSlot);
+    loadCharacter: function() {
+        let dataJson = null;
+        try {
+            dataJson = localStorage.getItem(this.currentSlot);
+        } catch(e) {
+            // Если память заблокирована CodePen, отдаем чистый пакет без предвыбранной школы
+            dataJson = JSON.stringify({ texts: ['Новый Самурай', '', '', '', '1', ''] });
+        }
+
         if (!dataJson) return;
         const pack = JSON.parse(dataJson);
         const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
@@ -2722,8 +4647,21 @@ const L5R = {
         const nameEl = document.getElementById('bio-name');
         const badge = document.getElementById('current-char-badge');
         if (badge && nameEl) badge.innerText = nameEl.value || 'Новый Самурай';
+
+        // МГНОВЕННАЯ СИНХРОНИЗАЦИЯ ВСЕХ ДАННЫХ ДЛЯ РЕЖИМА ИГРЫ
+        const fields = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
+        fields.forEach(id => {
+            const inputEl = document.getElementById(id);
+            const textEl = document.getElementById(id + '-text');
+            if (inputEl && textEl) {
+                textEl.innerText = inputEl.value.trim();
+            }
+        });
+
         this.autoCheckModeAndRender();
+
     },
+
 
             changeCombatStatus: function(type, amount) {
         if (type === 'wounds') {
@@ -2808,7 +4746,7 @@ const L5R = {
         });
     },
 
-    checkItemSearch: function(val) {
+        checkItemSearch: function(val) {
         if (!val.trim()) return;
         const found = ITEMS_DATABASE.find(i => i.name.toLowerCase() === val.toLowerCase());
         if (found) {
@@ -2819,6 +4757,28 @@ const L5R = {
         } else { document.getElementById('item-name-input').value = val; }
     },
 
+        checkSchoolSearch: function(val) {
+        const datalist = document.getElementById('l5r-schools-suggestions');
+        if (!datalist) return;
+        datalist.innerHTML = ''; // Очищаем старые подсказки
+
+        if (!val.trim()) return;
+        const inputLower = val.trim().toLowerCase();
+
+        // Фильтруем ВСЕ ключи базы данных, в которых есть введенные буквы
+        const matches = Object.keys(SCHOOLS_DATABASE).filter(k => k.toLowerCase().includes(inputLower));
+        
+        // Наполняем datalist только совпавшими школами
+        matches.forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = SCHOOLS_DATABASE[key].name;
+            datalist.appendChild(opt);
+        });
+
+        // Мягко сохраняем то, что вводит пользователь в данный момент
+        this.saveCharacter();
+    },
+  
     addItem: function() {
         const nameIn = document.getElementById('item-name-input'), typeIn = document.getElementById('item-type-input'), descIn = document.getElementById('item-desc-input');
         const iName = nameIn.value.trim(), iDesc = descIn.value.trim();
@@ -2831,7 +4791,7 @@ const L5R = {
     },
 
     deleteItem: function(id) {
-        if (!confirm('Удалить этот предмет из инвентаря?')) return;
+        if (!confirm('Вы уверены, что хотите удалить этот предмет из снаряжения?')) return;
         window.characterInventory = window.characterInventory.filter(i => i.id !== id);
         this.renderInventory(); this.saveCharacter(); setTimeout(() => this.initItemSuggestions(), 10);
     },
@@ -3006,7 +4966,7 @@ const L5R = {
         });
     },
 
-    toggleMode: function() { this.isLockMode = !this.isLockMode; this.applyLockModeUI(); },
+        toggleMode: function() { this.isLockMode = !this.isLockMode; this.calc(); this.applyLockModeUI(); },
 
     applyLockModeUI: function() {
         const sheet = document.getElementById('main-character-sheet'), btn = document.getElementById('modeToggleBtn'); if (!sheet || !btn) return;
@@ -3017,31 +4977,118 @@ const L5R = {
         this.renderInventory();
     },
 
-    bindAutoSave: function() {
+                bindAutoSave: function() {
         const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
         ids.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', () => this.saveCharacter()); });
+        
+        const schoolInput = document.getElementById('bio-school');
+        if (schoolInput) {
+            // Клик по полю школы открывает модальное окно таблицы
+            schoolInput.addEventListener('click', () => {
+                if (this.isLockMode) { this.openSchoolModal(); }
+            });
+  // Если включен режим игры, полностью блокируем ввод букв с клавиатуры в это поле
+            schoolInput.addEventListener('keydown', (e) => {
+                if (this.isLockMode) { e.preventDefault(); }
+            });
+        }
+    },
+
+    
+                openSchoolModal: function() {
+        const inputVal = (document.getElementById('bio-school')?.value || '').trim().toLowerCase();
+        
+        // ЗАЩИТА: Если школа еще не выбрана, не открываем пустое окно
+        if (!inputVal) {
+            alert("Самурай, сначала выберите Школу в Режиме Правки (🔓).");
+            return;
+        }
+
+        const modal = document.getElementById('school-modal');
+        if (!modal) return;
+        
+        // Умный поиск по частичному вхождению букв
+        const baseKey = Object.keys(SCHOOLS_DATABASE).find(k => k.toLowerCase().includes(inputVal));
+        const schoolData = baseKey ? SCHOOLS_DATABASE[baseKey] : null;
+
+        if (!schoolData) {
+            alert("Самурай, для школы '" + (document.getElementById('bio-school')?.value || '') + "' свиток развития ещё не написан в базе данных.");
+            return;
+        }
+
+        document.getElementById('modal-school-title').innerText = schoolData.name;
+        const select = document.getElementById('modal-rank-select');
+        if (select) {
+            select.innerHTML = '';
+            Object.keys(schoolData.ranks).forEach(rank => {
+                const opt = document.createElement('option');
+                opt.value = rank; opt.innerText = "Ранг " + rank; select.appendChild(opt);
+            });
+            const curRank = parseInt(document.getElementById('bio-rank')?.value) || 1;
+            select.value = schoolData.ranks[curRank] ? curRank : 1;
+        }
+
+        modal.style.display = 'flex'; this.renderSchoolTable();
+    },
+
+    closeSchoolModal: function() {
+        const modal = document.getElementById('school-modal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    renderSchoolTable: function() {
+        const inputVal = (document.getElementById('bio-school')?.value || '').trim().toLowerCase();
+        const selectedRank = document.getElementById('modal-rank-select')?.value;
+        const tbody = document.getElementById('school-table-body');
+        if (!tbody || !selectedRank) return; tbody.innerHTML = '';
+
+        // Поиск элементов ранга с поддержкой частичного ввода названия школы
+        const baseKey = Object.keys(SCHOOLS_DATABASE).find(k => k.toLowerCase().includes(inputVal));
+        const items = baseKey ? (SCHOOLS_DATABASE[baseKey]?.ranks[selectedRank] || []) : [];
+        items.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid #333';
+            const isMaster = item.type === "Мастерская способность";
+            const nameColor = isMaster ? "#d4af37" : "#fff";
+            const typeColor = isMaster ? "#d4af37" : "#aaa";
+            
+            tr.innerHTML = `
+                <td style="padding: 10px 8px; color: ${nameColor}; font-weight: ${isMaster ? 'bold' : 'normal'};">⭕ ${item.name}</td>
+                <td style="padding: 10px 8px; color: ${typeColor}; font-style: ${isMaster ? 'italic' : 'normal'}; text-transform: uppercase; font-size: 10px;">${item.type}</td>
+            `;
+            tbody.appendChild(tr);
+        });
     }
 
-};
+}; // 2. ЗДЕСЬ ЗАКРЫЛСЯ ГЛОБАЛЬНЫЙ ОБЪЕКТ L5R! (Эту скобку мы искали)
+
 function initTechObserver() {
     L5R.initSearchSuggestions(); L5R.initTraitSuggestions(); L5R.initItemSuggestions();
     L5R.autoCheckModeAndRender(); L5R.renderTraits(); L5R.renderInventory(); L5R.renderStartScreenList();
     const containerEl = document.querySelector('.container');
     if (containerEl) { 
         const observer = new MutationObserver((mutations) => { 
-    mutations.forEach(mutation => {
-        if (mutation.attributeName === 'class') {
-            L5R.autoCheckModeAndRender(); L5R.renderTraits(); L5R.renderInventory();
-        }
-    });
-});
+            mutations.forEach(mutation => {
+                if (mutation.attributeName === 'class') {
+                    L5R.autoCheckModeAndRender(); L5R.renderTraits(); L5R.renderInventory();
+                }
+            });
+        });
         observer.observe(containerEl, { attributes: true, attributeFilter: ['class'] }); 
     }
-    }
+} // 3. Закрылась функция initTechObserver
 
 document.addEventListener('DOMContentLoaded', () => initTechObserver());
-// Автоматическая регистрация оффлайн-режима самурайского листа
-if ('serviceWorker' in navigator) {
+
+window.L5R = L5R;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => L5R.init());
+} else {
+    L5R.init();
+}
+
+if ('serviceWorker' in navigator && !window.location.href.includes('codepen') && !window.location.href.includes('cdpn')) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
             .then(reg => console.log('Книга Записей готова к оффлайн-игре!', reg.scope))
