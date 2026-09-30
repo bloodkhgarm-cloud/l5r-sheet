@@ -18,12 +18,25 @@
         .skill-value { font-size: 16px; font-weight: bold; color: #fff; min-width: 20px; text-align: center; }
         body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; padding: 15px; margin: 0; }
         .container { max-width: 500px; margin: 0 auto; background: #1c1c1c; border: 2px solid #8b0000; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        h1 { color: #d4af37; text-align: center; font-size: 24px; border-bottom: 2px solid #8b0000; padding-bottom: 10px; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+                h1 { color: #d4af37; text-align: center; font-size: 24px; border-bottom: 2px solid #8b0000; padding-bottom: 10px; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
         h2 { color: #d4af37; font-size: 18px; margin-top: 20px; border-bottom: 1px solid #444; padding-bottom: 5px; }
-        .input-group { margin-bottom: 12px; }
+        .input-group { margin-bottom: 12px; }        
+        /* Защита верхнего имени от налезания на кнопку */
+        #current-char-badge {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 60%;
+            text-align: right;
+        }
         label { display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         input, textarea, select { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff; box-sizing: border-box; font-size: 14px; }
-        input:focus, textarea:focus, select:focus { border-color: #d4af37; outline: none; }
+        input:focus, textarea:focus, select:focus { border-color: #d4af37; outline: none; }        
+        /* Защита игрового режима от распирания экстремально длинными словами */
+        .game-only {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
         .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .ring-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
         .ring-card { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 10px; text-align: center; border-left: 4px solid #8b0000; }
@@ -52,6 +65,18 @@
         .char-list-container { margin: 20px 0; display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
         .btn-char-select { width: 100%; background: #252525; color: #fff; border: 1px solid #444; border-left: 5px solid #d4af37; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
         .btn-char-select:hover { background: #2a2222; border-color: #5a1a1a; border-left-color: #8b0000; }
+        /* Фикс для красивого сокращения имени на кнопке */
+        .btn-char-select span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+            flex: 1;
+        }
+        .btn-char-delete {
+            background: none; border: none; color: #ef5350; cursor: pointer; font-size: 16px; padding: 5px; transition: transform 0.1s;
+            flex-shrink: 0; /* Не дает крестику сжиматься или переноситься */
+        }
         .btn-char-create { width: 100%; background: #5a1a1a; color: white; border: 1px solid #8b0000; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
         .btn-char-create:hover { background: #8b0000; }
         .btn-char-delete { background: none; border: none; color: #ef5350; cursor: pointer; font-size: 16px; padding: 5px; transition: transform 0.1s; }
@@ -67,19 +92,22 @@
             input, textarea, select { padding: 8px; font-size: 13px; }
             .btn-mode-toggle { padding: 10px; font-size: 11px; letter-spacing: 0.5px; }
             
-            /* АДАПТАЦИЯ КОЛЕЦ И ХАРАКТЕРИСТИК */
+                        /* АДАПТАЦИЯ КОЛЕЦ И ХАРАКТЕРИСТИК */
             .ring-grid { grid-template-columns: 1fr; gap: 6px; }
             .ring-card { 
-    padding: 10px 8px; 
-    display: flex; 
-    flex-direction: column; /* Выстраивает название и кнопки друг под другом */
-    align-items: center; 
-    text-align: center; }
+                padding: 10px 8px; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                text-align: center; 
+            }
             .ring-name { 
-    margin-bottom: 6px; /* Создает отступ между текстом и кнопками */
-    font-size: 14px; }
-            .btn-ring { width: 34px; height: 34px; font-size: 16px; }
-            .ring-value { font-size: 18px; min-width: 20px; }
+                margin-bottom: 6px; 
+                font-size: 14px; 
+            }
+            .btn-ring { width: 30px !important; height: 30px !important; font-size: 14px !important; }
+            .ring-controls { gap: 8px !important; }
+            .ring-value { font-size: 16px !important; min-width: 20px; }
             .attr-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
             .attr-card { padding: 8px; }
             .attr-name { font-size: 10px; }
@@ -4803,59 +4831,60 @@ const L5R = {
         }
     },
 
-    changeXP: function(type, amount) {
-    if (this.isLockMode) return;
+        changeXP: function(type, amount) {
+        if (this.isLockMode) return;
 
-    const schoolEls = document.querySelectorAll('.xp-school-val');
-    const totalEl = document.getElementById('xp-total');
-    const currentEl = document.getElementById('xp-current');
-    const maxEls = document.querySelectorAll('.xp-max-val');
-    const rankInput = document.getElementById('bio-rank');
-    
-    if (schoolEls.length === 0 || !totalEl || !currentEl) return;
-
-    let schoolXP = parseInt(schoolEls[0].innerText) || 0;
-    let totalXP = parseInt(totalEl.innerText) || 0;
-    let currentXP = parseInt(currentEl.innerText) || 0;
-    let curRank = rankInput ? (parseInt(rankInput.value) || 1) : 1;
-
-    const thresholds = { 1: 20, 2: 24, 3: 32, 4: 44, 5: 60 };
-    let currentMax = thresholds[curRank] || 60;
-
-    if (type === 'school') {
-        let nextSchool = schoolXP + amount;
-        if (nextSchool < 0) return;
-        if (nextSchool >= currentMax) {
-            schoolXP = 0;
-            if (rankInput && curRank < 6) {
-                rankInput.value = curRank + 1; curRank++;
-                maxEls.forEach(el => el.innerText = thresholds[curRank] || 60);
-                alert(`🌸 Поздравляем! Ваш самурай достиг ${curRank} ранга школы!`);
-            }
-        } else { schoolXP = nextSchool; }
-    } else if (type === 'total') {
-        totalXP += amount; if (totalXP < 0) totalXP = 0;
-    } else if (type === 'current') {
-        let nextCurrent = currentXP + amount;
-        if (nextCurrent < 0) return;
+        const schoolEls = document.querySelectorAll('.xp-school-val');
+        const totalEl = document.getElementById('xp-total');
+        const currentEl = document.getElementById('xp-current');
+        const maxEls = document.querySelectorAll('.xp-max-val');
+        const rankInput = document.getElementById('bio-rank');
         
-        // ЭВРИКА: Если опыт уменьшают (тратят доступный), он автоматом капает в Потрачено!
-        if (amount < 0) {
-            totalXP += Math.abs(amount);
+        if (schoolEls.length === 0 || !totalEl || !currentEl) return;
+
+        // Берем значение гарантированно из текущего активного текстового поля
+        let schoolXP = parseInt(schoolEls[0].innerText) || 0;
+        let totalXP = parseInt(totalEl.innerText) || 0;
+        let currentXP = parseInt(currentEl.innerText) || 0;
+        let curRank = rankInput ? (parseInt(rankInput.value) || 1) : 1;
+
+        const thresholds = { 1: 20, 2: 24, 3: 32, 4: 44, 5: 60 };
+        let currentMax = thresholds[curRank] || 60;
+
+        if (type === 'school') {
+            let nextSchool = schoolXP + amount;
+            if (nextSchool < 0) return;
+            if (nextSchool >= currentMax) {
+                schoolXP = 0;
+                if (rankInput && curRank < 6) {
+                    rankInput.value = curRank + 1; curRank++;
+                    maxEls.forEach(el => el.innerText = thresholds[curRank] || 60);
+                    alert(`🌸 Поздравляем! Ваш самурай достиг ${curRank} ранга школы!`);
+                }
+            } else { schoolXP = nextSchool; }
+        } else if (type === 'total') {
+            totalXP += amount; if (totalXP < 0) totalXP = 0;
+        } else if (type === 'current') {
+            let nextCurrent = currentXP + amount;
+            if (nextCurrent < 0) return;
+            
+            if (amount < 0) {
+                totalXP += Math.abs(amount);
+            }
+            currentXP = nextCurrent;
         }
-        currentXP = nextCurrent;
-    }
 
-    schoolEls.forEach(el => el.innerText = schoolXP);
-    totalEl.innerText = totalXP;
-    currentEl.innerText = currentXP;
-    
-    document.querySelectorAll('.xp-total-view').forEach(el => el.innerText = totalXP);
-    document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = currentXP);
+        // Синхронно обновляем абсолютно все копии на экранах игры и правки
+        schoolEls.forEach(el => el.innerText = schoolXP);
+        totalEl.innerText = totalXP;
+        currentEl.innerText = currentXP;
+        
+        document.querySelectorAll('.xp-total-view').forEach(el => el.innerText = totalXP);
+        document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = currentXP);
 
-    this.calc();
-    this.saveCharacter();
-},
+        this.calc();
+        this.saveCharacter();
+    },
   
         initItemSuggestions: function() {
         const datalist = document.getElementById('l5r-items-suggestions'); if (!datalist) return;
