@@ -43,7 +43,7 @@
         .bar-wounds { background-color: #b71c1c; }
         .bar-strife { background-color: #e65100; }
         .bar-unmasked { background-color: #ff1100 !important; box-shadow: 0 0 8px #ff1100; }
-        .lock-mode .btn-ring, .lock-mode .btn-skill { display: none !important; }
+        .lock-mode .btn-ring, .lock-mode .btn-skill, .lock-mode .btn-xp-ctrl { display: none !important; }
         .lock-mode input, .lock-mode textarea, .lock-mode select { background: #151515 !important; border-color: #222 !important; pointer-events: none; }
         .btn-mode-toggle { width: 100%; background: #d4af37; color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 6px; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn-mode-toggle.editing { background: #2e7d32; color: #fff; }
@@ -168,7 +168,8 @@
     </div>
 
     <h1>Лист Самурая (L5R 5e)</h1>
-    <button id="modeToggleBtn" class="btn-mode-toggle" onclick="L5R.toggleMode()">🔒 Режим Игры (Нажмите для редактирования)</button>
+    <button id="modeToggleBtn" class="btn-mode-toggle" onclick="L5R.toggleMode()">🔒 Режим Игры (Нажмите для редактирования)</button>  
+  
     
         <!-- ЕДИНЫЙ БЛОК ДАННЫХ ПЕРСОНАЖА -->
     <div style="background: #1e1e1e; border: 1px solid #444; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
@@ -206,7 +207,7 @@
             </div>
             <div class="input-group">
                 <label>Ранг Школы</label>
-                <input type="text" id="bio-rank" placeholder="Ранг..." class="edit-only">
+                <input type="text" id="bio-rank" placeholder="Ранг..." class="edit-only" readonly style="pointer-events: none; background: #1a1a1a; color: #aaa;">
                 <div id="bio-rank-text" class="game-only" style="padding: 10px; background: #2a2a2a; border: 1px solid #333; border-radius: 6px; color: #fff; font-size: 14px; text-align: center; font-weight: bold; min-height: 38px; box-sizing: border-box;"></div>
             </div>
         </div>
@@ -224,13 +225,58 @@
                     <!-- Игровой текст (виден строго в режиме игры) -->
                     <div id="bio-history-text" class="game-only" style="padding: 10px; background: #151515; border: 1px dashed #444; border-radius: 6px; color: #ccc; font-size: 13px; white-space: pre-wrap; min-height: 38px; max-height: 200px; overflow-y: auto; box-sizing: border-box; width: 100%;"></div>
                 </div>
-            </details>
+                       </details>
         </div>
 
     </div>
 
-       
+    <!-- БЛОК ОПЫТА САМУРАЯ -->
+<h2>Опыт и Развитие</h2>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; background: #222; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box;">
+    
+    <!-- Опыт в путь школы -->
+    <div style="text-align: center; border-right: 1px dashed #444; padding-right: 4px;">
+        <div style="font-size: 10px; color: #d4af37; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">В путь школы</div>
+        <div class="edit-only" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
+            <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0;" onclick="L5R.changeXP('school', -1)">-</button>
+            <span style="font-size: 14px; font-weight: bold; color: #fff; min-width: 35px;"><span class="xp-school-val">0</span>/<span class="xp-max-val">20</span></span>
+            <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0;" onclick="L5R.changeXP('school', 1)">+</button>
+        </div>
+        <div class="game-only" style="font-size: 14px; font-weight: bold; color: #fff; min-height: 24px; line-height: 24px;">
+            <span class="xp-school-val">0</span>/<span class="xp-max-val">20</span>
+        </div>
+    </div>
+
+    <!-- Всего потрачено опыта за все время -->
+    <div style="text-align: center; border-right: 1px dashed #444; padding: 0 4px;">
+        <div style="font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Всего потрачено</div>
+        <div class="edit-only" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
+            <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #5a1a1a;" onclick="L5R.changeXP('total', -1)">-</button>
+            <span id="xp-total" style="font-size: 16px; font-weight: bold; color: #fff; min-width: 28px;">0</span>
+            <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #1b5e20;" onclick="L5R.changeXP('total', 1)">+</button>
+        </div>
+        <div class="game-only" style="font-size: 16px; font-weight: bold; color: #fff; min-height: 24px; line-height: 24px;">
+            <span class="xp-total-view">0</span>
+        </div>
+    </div>
+
+    <!-- Доступный опыт -->
+    <div style="text-align: center; padding-left: 4px;">
+        <div style="font-size: 10px; color: #2e7d32; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Доступный опыт</div>
+        <div class="edit-only" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
+            <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #5a1a1a;" onclick="L5R.changeXP('current', -1)">-</button>
+            <span id="xp-current" style="font-size: 16px; font-weight: bold; color: #fff; min-width: 28px;">0</span>
+            <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #1b5e20;" onclick="L5R.changeXP('current', 1)">+</button>
+        </div>
+        <div class="game-only" style="font-size: 16px; font-weight: bold; color: #fff; min-height: 24px; line-height: 24px;">
+            <span class="xp-current-view">0</span>
+        </div>
+    </div>
+
+</div>
+
     <h2>Пять Колец (Подходы)</h2>
+
 
     <div class="ring-grid">
         <div class="ring-card">
@@ -2862,8 +2908,7 @@ const TRAITS_DATABASE = [
     },
     {
         name: "Потерянные воспоминания (Пустота)",
-        type: "Недостаток",
-        desc: "Ментальный, шрам.\n\nЭффект: Часть вашей жизни стерта из памяти, но навыки того периода сохранились. Когда вы выполняете проверку, чтобы вспомнить информацию, полученную в забытый период, или осознать его последствия (например, Культура [Пустота], чтобы интуитивно понять поведение в ситуации, связанной с забытым прошлым, или Медитация [Пустота] для анализа своих прошлых решений), вы обязаны перебросить две кости с успехами (⭕) или взрывными успехами (💥). При провале броска вы получаете 1 очко Пустоты."
+        type: "Ментальный, шрам.\n\nЭффект: Часть вашей жизни стерта из памяти, но навыки того периода сохранились. Когда вы выполняете проверку, чтобы вспомнить информацию, полученную в забытый период, или осознать его последствия (например, Культура [Пустота], чтобы интуитивно понять поведение в ситуации, связанной с забытым прошлым, или Медитация [Пустота] для анализа своих прошлых решений), вы обязаны перебросить две кости с успехами (⭕) или взрывными успехами (💥). При провале броска вы получаете 1 очко Пустоты."
     },
     {
         name: "Изуродованная рука (Огонь)",
@@ -4180,7 +4225,7 @@ const TECH_DATABASE = [
     {
         name: "Демон, убирайся!",
         type: "Техника школы",
-        desc: "Мастерская способность (6 ранг Школы Хранителей святилищ Кайто).\n\nВ качестве действия вы можете сделать проверку Медитации (Пустота) с ЦЧ 3, потянув за тетиву лука, которым вы владеете, нацеливаясь на каждое Потустороннее существо в пределах диапазона, равного вашему рангу в Медитации. Если вы добьетесь успеха, каждая цель получит Смятение в количестве, равном вашему рангу в Медитации, плюс ваши бонусные успехи.\n\n⚙️: Каждая цель должна сопротивляться с помощью проверки Медитации (Пустота) с ЦЧ 3 и в случае неудачи следует рассматривать ее физическое и сверхъестественное сопротивление как 0. Этот эффект сохраняется до конца сцены."
+        desc: "Мастерская способнйаыость (6 ранг Школы Хранителей святилищ Кайто).\n\nВ качестве действия вы можете сделать проверку Медитации (Пустота) с ЦЧ 3, потянув за тетиву лука, которым вы владеете, нацеливаясь на каждое Потустороннее существо в пределах диапазона, равного вашему рангу в Медитации. Если вы добьетесь успеха, каждая цель получит Смятение в количестве, равном вашему рангу в Медитации, плюс ваши бонусные успехи.\n\n⚙️: Каждая цель должна сопротивляться с помощью проверки Медитации (Пустота) с ЦЧ 3 и в случае неудачи следует рассматривать ее физическое и сверхъестественное сопротивление как 0. Этот эффект сохраняется до конца сцены."
     },
     {
         name: "Маленькие истины",
@@ -4482,7 +4527,12 @@ const L5R = {
         if (document.getElementById('social-glory')) document.getElementById('social-glory').innerText = '30';
         if (document.getElementById('social-status')) document.getElementById('social-status').innerText = '30';
 
+        if (document.getElementById('xp-school')) document.getElementById('xp-school').innerText = '0';
+        if (document.getElementById('xp-total')) document.getElementById('xp-total').innerText = '0';
+        if (document.getElementById('xp-current')) document.getElementById('xp-current').innerText = '0';
+
         this.calc();
+
     },
 
     createNewCharacter: function() {
@@ -4524,50 +4574,47 @@ const L5R = {
         }
     },
             saveCharacter: function() {
-        if (!this.currentSlot) return;
-        const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
-        const textValues = ids.map(id => document.getElementById(id) ? document.getElementById(id).value : '');
-
-        const nameEl = document.getElementById('bio-name');
-        const charName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : 'Новый Самурай';
-        const rings = {};
-        ['air', 'earth', 'fire', 'water', 'void'].forEach(r => { 
-            const el = document.getElementById(r); if (el) rings[r] = el.innerText; 
-        });
-        const skills = {};
-        document.querySelectorAll('.skill-value').forEach(s => { skills[s.id] = s.innerText; });
-        
+    if (!this.currentSlot) return;
+    const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
+    const textValues = ids.map(id => document.getElementById(id) ? document.getElementById(id).value : '');
+    const nameEl = document.getElementById('bio-name');
+    const charName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : 'Новый Самурай';
+    const rings = {};
+    ['air', 'earth', 'fire', 'water', 'void'].forEach(r => { 
+        const el = document.getElementById(r); if (el) rings[r] = el.innerText; 
+    });
+    const skills = {};
+    document.querySelectorAll('.skill-value').forEach(s => { skills[s.id] = s.innerText; });
+    
         const pack = {
-            texts: textValues,
-            rings: rings,
-            skills: skills,
-            curWounds: window.currentWoundsCount,
-            curStrife: window.currentStrifeCount,
-            curVoid: document.getElementById('curVoidPoints') ? document.getElementById('curVoidPoints').innerText : '0',
-            techniques: window.characterTechniques || [],
-            traits: window.characterTraits || [],
-            inventory: window.characterInventory || [],
-            koku: document.getElementById('money-koku') ? document.getElementById('money-koku').innerText : '0',
-            bu: document.getElementById('money-bu') ? document.getElementById('money-bu').innerText : '0',
-            zeni: document.getElementById('money-zeni') ? document.getElementById('money-zeni').innerText : '0',
-            statuses: window.characterStatuses || {},
-            stance: window.characterStance || '',
-            honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '30',
-            glory: document.getElementById('social-glory') ? document.getElementById('social-glory').innerText : '30',
-            status: document.getElementById('social-status') ? document.getElementById('social-status').innerText : '30'
-
-        };
-        
+        texts: textValues, rings: rings, skills: skills,
+        curWounds: window.currentWoundsCount, curStrife: window.currentStrifeCount,
+        curVoid: document.getElementById('curVoidPoints') ? document.getElementById('curVoidPoints').innerText : '0',
+        techniques: window.characterTechniques || [], traits: window.characterTraits || [],
+        inventory: window.characterInventory || [],
+        koku: document.getElementById('money-koku') ? document.getElementById('money-koku').innerText : '0',
+        bu: document.getElementById('money-bu') ? document.getElementById('money-bu').innerText : '0',
+        zeni: document.getElementById('money-zeni') ? document.getElementById('money-zeni').innerText : '0',
+        statuses: window.characterStatuses || {}, stance: window.characterStance || '',
+        honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '30',
+        glory: document.getElementById('social-glory') ? document.getElementById('social-glory').innerText : '30',
+        status: document.getElementById('social-status') ? document.getElementById('social-status').innerText : '30',
+        xpSchool: document.getElementById('xp-school') ? document.getElementById('xp-school').innerText : '0',
+        xpTotal: document.getElementById('xp-total') ? document.getElementById('xp-total').innerText : '0',
+        xpCurrent: document.getElementById('xp-current') ? document.getElementById('xp-current').innerText : '0',
+        xpEarned: document.getElementById('xp-earned') ? document.getElementById('xp-earned').innerText : '0'
+    };
+    
+    try {
         localStorage.setItem(this.currentSlot, JSON.stringify(pack));
-        const list = this.getCharacterList();
-        const me = list.find(c => c.id === this.currentSlot);
+        let list = this.getCharacterList();
+        let me = list.find(c => c.id === this.currentSlot);
         if (me && me.name !== charName) {
             me.name = charName;
             localStorage.setItem('l5r_character_list', JSON.stringify(list));
-            const badge = document.getElementById('current-char-badge');
-            if (badge) badge.innerText = charName;
         }
-    },        
+    } catch(e) { console.warn("Временный режим: localStorage недоступен"); }
+},        
     
     loadCharacter: function() {
         let dataJson = null;
@@ -4599,7 +4646,7 @@ const L5R = {
         window.characterTraits = pack.traits || [];
         this.renderTraits();
         this.calc();
-                if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = pack.koku || '0';
+        if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = pack.koku || '0';
         if (document.getElementById('money-bu')) document.getElementById('money-bu').innerText = pack.bu || '0';
         if (document.getElementById('money-zeni')) document.getElementById('money-zeni').innerText = pack.zeni || '0';
                 window.characterInventory = pack.inventory || [];
@@ -4613,10 +4660,21 @@ const L5R = {
         if (document.getElementById('social-honor')) document.getElementById('social-honor').innerText = pack.honor !== undefined ? pack.honor : 30;
         if (document.getElementById('social-glory')) document.getElementById('social-glory').innerText = pack.glory !== undefined ? pack.glory : 30;
         if (document.getElementById('social-status')) document.getElementById('social-status').innerText = pack.status !== undefined ? pack.status : 30;
+        
+        const sVal = pack.xpSchool || '0';
+        document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = sVal);
+        
+        const tXP = pack.xpTotal || '0';
+        if (document.getElementById('xp-total')) document.getElementById('xp-total').innerText = tXP;
+        document.querySelectorAll('.xp-total-view').forEach(el => el.innerText = tXP);
+        
+        const cXP = pack.xpCurrent || '0';
+        if (document.getElementById('xp-current')) document.getElementById('xp-current').innerText = cXP;
+        document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = cXP);
+    },
 
-        },
     
-                   calc: function() {
+    calc: function() {
         const getVal = (id) => { const el = document.getElementById(id); return el ? (parseInt(el.innerText) || 1) : 1; };
         const air = getVal('air'), earth = getVal('earth'), fire = getVal('fire'), water = getVal('water'), voidR = getVal('void');
         
@@ -4641,27 +4699,35 @@ const L5R = {
         const barS = document.getElementById('barStrife');
         if (barS) {
             barS.style.width = composure > 0 ? Math.min(100, (window.currentStrifeCount / composure * 100)) + '%' : '0%';
-            if (window.currentStrifeCount >= composure && composure > 0) barS.classList.add('bar-unmasked');
-            else barS.classList.remove('bar-unmasked');
+        if (window.currentStrifeCount >= composure && composure > 0) barS.classList.add('bar-unmasked');
+        else barS.classList.remove('bar-unmasked');
         }
         const nameEl = document.getElementById('bio-name');
         const badge = document.getElementById('current-char-badge');
         if (badge && nameEl) badge.innerText = nameEl.value || 'Новый Самурай';
 
-        // МГНОВЕННАЯ СИНХРОНИЗАЦИЯ ВСЕХ ДАННЫХ ДЛЯ РЕЖИМА ИГРЫ
+                // МГНОВЕННАЯ СИНХРОНИЗАЦИЯ ВСЕХ ДАННЫХ ДЛЯ РЕЖИМА ИГРЫ
         const fields = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
         fields.forEach(id => {
             const inputEl = document.getElementById(id);
             const textEl = document.getElementById(id + '-text');
-            if (inputEl && textEl) {
-                textEl.innerText = inputEl.value.trim();
-            }
+            if (inputEl && textEl) { textEl.innerText = inputEl.value.trim(); }
         });
 
+        // Расчет максимумов опыта и синхронизация игрового экрана
+        const rVal = parseInt(document.getElementById('bio-rank')?.value) || 1;
+        const tList = { 1: 20, 2: 24, 3: 32, 4: 44, 5: 60 };
+        document.querySelectorAll('.xp-max-val').forEach(el => el.innerText = tList[rVal] || 60);
+
+        const cXP = document.getElementById('xp-current') ? document.getElementById('xp-current').innerText : '0';
+        document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = cXP);
+        
+        const firstSchoolEl = document.querySelectorAll('.xp-school-val')[0];
+        const sXP = firstSchoolEl ? firstSchoolEl.innerText : '0';
+        document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = sXP);
+
         this.autoCheckModeAndRender();
-
     },
-
 
             changeCombatStatus: function(type, amount) {
         if (type === 'wounds') {
@@ -4727,7 +4793,7 @@ const L5R = {
 
         this.saveCharacter();
     },
-        changeSocial: function(attr, amount) {
+                changeSocial: function(attr, amount) {
         const el = document.getElementById('social-' + attr);
         if (!el) return;
         let next = (parseInt(el.innerText) || 0) + amount;
@@ -4737,6 +4803,60 @@ const L5R = {
         }
     },
 
+    changeXP: function(type, amount) {
+    if (this.isLockMode) return;
+
+    const schoolEls = document.querySelectorAll('.xp-school-val');
+    const totalEl = document.getElementById('xp-total');
+    const currentEl = document.getElementById('xp-current');
+    const maxEls = document.querySelectorAll('.xp-max-val');
+    const rankInput = document.getElementById('bio-rank');
+    
+    if (schoolEls.length === 0 || !totalEl || !currentEl) return;
+
+    let schoolXP = parseInt(schoolEls[0].innerText) || 0;
+    let totalXP = parseInt(totalEl.innerText) || 0;
+    let currentXP = parseInt(currentEl.innerText) || 0;
+    let curRank = rankInput ? (parseInt(rankInput.value) || 1) : 1;
+
+    const thresholds = { 1: 20, 2: 24, 3: 32, 4: 44, 5: 60 };
+    let currentMax = thresholds[curRank] || 60;
+
+    if (type === 'school') {
+        let nextSchool = schoolXP + amount;
+        if (nextSchool < 0) return;
+        if (nextSchool >= currentMax) {
+            schoolXP = 0;
+            if (rankInput && curRank < 6) {
+                rankInput.value = curRank + 1; curRank++;
+                maxEls.forEach(el => el.innerText = thresholds[curRank] || 60);
+                alert(`🌸 Поздравляем! Ваш самурай достиг ${curRank} ранга школы!`);
+            }
+        } else { schoolXP = nextSchool; }
+    } else if (type === 'total') {
+        totalXP += amount; if (totalXP < 0) totalXP = 0;
+    } else if (type === 'current') {
+        let nextCurrent = currentXP + amount;
+        if (nextCurrent < 0) return;
+        
+        // ЭВРИКА: Если опыт уменьшают (тратят доступный), он автоматом капает в Потрачено!
+        if (amount < 0) {
+            totalXP += Math.abs(amount);
+        }
+        currentXP = nextCurrent;
+    }
+
+    schoolEls.forEach(el => el.innerText = schoolXP);
+    totalEl.innerText = totalXP;
+    currentEl.innerText = currentXP;
+    
+    document.querySelectorAll('.xp-total-view').forEach(el => el.innerText = totalXP);
+    document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = currentXP);
+
+    this.calc();
+    this.saveCharacter();
+},
+  
         initItemSuggestions: function() {
         const datalist = document.getElementById('l5r-items-suggestions'); if (!datalist) return;
         datalist.innerHTML = '';
@@ -4966,16 +5086,31 @@ const L5R = {
         });
     },
 
-        toggleMode: function() { this.isLockMode = !this.isLockMode; this.calc(); this.applyLockModeUI(); },
+        toggleMode: function() { 
+    this.isLockMode = !this.isLockMode; 
+    this.calc(); 
+    this.applyLockModeUI(); 
+},
 
-    applyLockModeUI: function() {
-        const sheet = document.getElementById('main-character-sheet'), btn = document.getElementById('modeToggleBtn'); if (!sheet || !btn) return;
-        if (this.isLockMode) { sheet.classList.add('lock-mode'); btn.textContent = '🔒 Режим Игры (Нажмите для редактирования)'; btn.classList.remove('editing'); }
-        else { sheet.classList.remove('lock-mode'); btn.textContent = '🔓 Режим Правки (Нажмите для фиксации)'; btn.classList.add('editing'); }
-        this.autoCheckModeAndRender(); // Возвращаем только сюда, без дублирования в MutationObserver
-        this.renderTraits();
-        this.renderInventory();
-    },
+applyLockModeUI: function() {
+    const sheet = document.getElementById('main-character-sheet');
+    const btn = document.getElementById('modeToggleBtn'); 
+    if (!sheet || !btn) return;
+    
+    if (this.isLockMode) { 
+        sheet.classList.add('lock-mode'); 
+        btn.textContent = '🔒 Режим Игры (Нажмите для редактирования)'; 
+        btn.classList.remove('editing'); 
+        } else { 
+        sheet.classList.remove('lock-mode'); 
+        btn.textContent = '🔓 Режим Правки (Нажмите для фиксации)'; 
+        btn.classList.add('editing'); 
+    }
+   
+    this.autoCheckModeAndRender(); 
+    this.renderTraits();
+    this.renderInventory();
+},
 
                 bindAutoSave: function() {
         const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
@@ -5063,20 +5198,23 @@ const L5R = {
 }; // 2. ЗДЕСЬ ЗАКРЫЛСЯ ГЛОБАЛЬНЫЙ ОБЪЕКТ L5R! (Эту скобку мы искали)
 
 function initTechObserver() {
-    L5R.initSearchSuggestions(); L5R.initTraitSuggestions(); L5R.initItemSuggestions();
-    L5R.autoCheckModeAndRender(); L5R.renderTraits(); L5R.renderInventory(); L5R.renderStartScreenList();
+    L5R.initSearchSuggestions(); 
+    L5R.initTraitSuggestions(); 
+    L5R.initItemSuggestions();
+    L5R.applyLockModeUI();
+    
     const containerEl = document.querySelector('.container');
     if (containerEl) { 
         const observer = new MutationObserver((mutations) => { 
+            let shouldRender = false;
             mutations.forEach(mutation => {
-                if (mutation.attributeName === 'class') {
-                    L5R.autoCheckModeAndRender(); L5R.renderTraits(); L5R.renderInventory();
-                }
+                if (mutation.attributeName === 'class') { shouldRender = true; }
             });
+            if (shouldRender) { L5R.autoCheckModeAndRender(); }
         });
         observer.observe(containerEl, { attributes: true, attributeFilter: ['class'] }); 
     }
-} // 3. Закрылась функция initTechObserver
+}
 
 document.addEventListener('DOMContentLoaded', () => initTechObserver());
 
