@@ -2936,7 +2936,8 @@ const TRAITS_DATABASE = [
     },
     {
         name: "Потерянные воспоминания (Пустота)",
-        type: "Ментальный, шрам.\n\nЭффект: Часть вашей жизни стерта из памяти, но навыки того периода сохранились. Когда вы выполняете проверку, чтобы вспомнить информацию, полученную в забытый период, или осознать его последствия (например, Культура [Пустота], чтобы интуитивно понять поведение в ситуации, связанной с забытым прошлым, или Медитация [Пустота] для анализа своих прошлых решений), вы обязаны перебросить две кости с успехами (⭕) или взрывными успехами (💥). При провале броска вы получаете 1 очко Пустоты."
+        type: "Недостаток",
+        desc: "Тип: Ментальный, шрам.\n\nЭффект: Часть вашей жизни стерта из памяти, но навыки того периода сохранились. Когда вы выполняете проверку, чтобы вспомнить информацию, полученную в забытый период, или осознать его последствия (например, Культура [Пустота], чтобы интуитивно понять поведение в ситуации, связанной с забытым прошлым, или Медитация [Пустота] для анализа своих прошлых решений), вы обязаны перебросить две кости с успехами (⭕) или взрывными успехами (💥). При провале броска вы получаете 1 очко Пустоты."   
     },
     {
         name: "Изуродованная рука (Огонь)",
@@ -4253,7 +4254,7 @@ const TECH_DATABASE = [
     {
         name: "Демон, убирайся!",
         type: "Техника школы",
-        desc: "Мастерская способнйаыость (6 ранг Школы Хранителей святилищ Кайто).\n\nВ качестве действия вы можете сделать проверку Медитации (Пустота) с ЦЧ 3, потянув за тетиву лука, которым вы владеете, нацеливаясь на каждое Потустороннее существо в пределах диапазона, равного вашему рангу в Медитации. Если вы добьетесь успеха, каждая цель получит Смятение в количестве, равном вашему рангу в Медитации, плюс ваши бонусные успехи.\n\n⚙️: Каждая цель должна сопротивляться с помощью проверки Медитации (Пустота) с ЦЧ 3 и в случае неудачи следует рассматривать ее физическое и сверхъестественное сопротивление как 0. Этот эффект сохраняется до конца сцены."
+        desc: "Мастерская способность (6 ранг Школы Хранителей святилищ Кайто).\n\nВ качестве действия вы можете сделать проверку Медитации (Пустота) с ЦЧ 3, потянув за тетиву лука, которым вы владеете, нацеливаясь на каждое Потустороннее существо в пределах диапазона, равного вашему рангу в Медитации. Если вы добьетесь успеха, каждая цель получит Смятение в количестве, равном вашему рангу в Медитации, плюс ваши бонусные успехи.\n\n⚙️: Каждая цель должна сопротивляться с помощью проверки Медитации (Пустота) с ЦЧ 3 и в случае неудачи следует рассматривать ее физическое и сверхъестественное сопротивление как 0. Этот эффект сохраняется до конца сцены."
     },
     {
         name: "Маленькие истины",
@@ -4555,7 +4556,7 @@ const L5R = {
         if (document.getElementById('social-glory')) document.getElementById('social-glory').innerText = '30';
         if (document.getElementById('social-status')) document.getElementById('social-status').innerText = '30';
 
-        if (document.getElementById('xp-school')) document.getElementById('xp-school').innerText = '0';
+            document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = '0');
         if (document.getElementById('xp-total')) document.getElementById('xp-total').innerText = '0';
         if (document.getElementById('xp-current')) document.getElementById('xp-current').innerText = '0';
 
@@ -4601,55 +4602,58 @@ const L5R = {
             this.saveCharacter();
         }
     },
-            saveCharacter: function() {
-    if (!this.currentSlot) return;
-    const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
-    const textValues = ids.map(id => document.getElementById(id) ? document.getElementById(id).value : '');
-    const nameEl = document.getElementById('bio-name');
-    const charName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : 'Новый Самурай';
-    const rings = {};
-    ['air', 'earth', 'fire', 'water', 'void'].forEach(r => { 
-        const el = document.getElementById(r); if (el) rings[r] = el.innerText; 
-    });
-    const skills = {};
-    document.querySelectorAll('.skill-value').forEach(s => { skills[s.id] = s.innerText; });
-    
+                saveCharacter: function() {
+        if (!this.currentSlot) return;
+        const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
+        const textValues = ids.map(id => document.getElementById(id) ? document.getElementById(id).value : '');
+        const nameEl = document.getElementById('bio-name');
+        const charName = nameEl && nameEl.value.trim() ? nameEl.value.trim() : 'Новый Самурай';
+        const rings = {};
+        ['air', 'earth', 'fire', 'water', 'void'].forEach(r => { 
+            const el = document.getElementById(r); if (el) rings[r] = el.innerText; 
+        });
+        const skills = {};
+        document.querySelectorAll('.skill-value').forEach(s => { skills[s.id] = s.innerText; });
+        
+        // ИСПРАВЛЕНО: Безопасное чтение опыта "В путь школы" через класс
+        const schoolXPCountEl = document.querySelector('.xp-school-val');
+        const schoolXPValue = schoolXPCountEl ? schoolXPCountEl.innerText : '0';
+        
         const pack = {
-        texts: textValues, rings: rings, skills: skills,
-        curWounds: window.currentWoundsCount, curStrife: window.currentStrifeCount,
-        curVoid: document.getElementById('curVoidPoints') ? document.getElementById('curVoidPoints').innerText : '0',
-        techniques: window.characterTechniques || [], traits: window.characterTraits || [],
-        inventory: window.characterInventory || [],
-        koku: document.getElementById('money-koku') ? document.getElementById('money-koku').innerText : '0',
-        bu: document.getElementById('money-bu') ? document.getElementById('money-bu').innerText : '0',
-        zeni: document.getElementById('money-zeni') ? document.getElementById('money-zeni').innerText : '0',
-        statuses: window.characterStatuses || {}, stance: window.characterStance || '',
-        honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '30',
-        glory: document.getElementById('social-glory') ? document.getElementById('social-glory').innerText : '30',
-        status: document.getElementById('social-status') ? document.getElementById('social-status').innerText : '30',
-        xpSchool: document.getElementById('xp-school') ? document.getElementById('xp-school').innerText : '0',
-        xpTotal: document.getElementById('xp-total') ? document.getElementById('xp-total').innerText : '0',
-        xpCurrent: document.getElementById('xp-current') ? document.getElementById('xp-current').innerText : '0',
-        xpEarned: document.getElementById('xp-earned') ? document.getElementById('xp-earned').innerText : '0'
-    };
-    
-    try {
-        localStorage.setItem(this.currentSlot, JSON.stringify(pack));
-        let list = this.getCharacterList();
-        let me = list.find(c => c.id === this.currentSlot);
-        if (me && me.name !== charName) {
-            me.name = charName;
-            localStorage.setItem('l5r_character_list', JSON.stringify(list));
-        }
-    } catch(e) { console.warn("Временный режим: localStorage недоступен"); }
-},        
-    
+            texts: textValues, rings: rings, skills: skills,
+            curWounds: window.currentWoundsCount, curStrife: window.currentStrifeCount,
+            curVoid: document.getElementById('curVoidPoints') ? document.getElementById('curVoidPoints').innerText : '0',
+            techniques: window.characterTechniques || [], traits: window.characterTraits || [],
+            inventory: window.characterInventory || [],
+            koku: document.getElementById('money-koku') ? document.getElementById('money-koku').innerText : '0',
+            bu: document.getElementById('money-bu') ? document.getElementById('money-bu').innerText : '0',
+            zeni: document.getElementById('money-zeni') ? document.getElementById('money-zeni').innerText : '0',
+            statuses: window.characterStatuses || {}, stance: window.characterStance || '',
+            honor: document.getElementById('social-honor') ? document.getElementById('social-honor').innerText : '30',
+            glory: document.getElementById('social-glory') ? document.getElementById('social-glory').innerText : '30',
+            status: document.getElementById('social-status') ? document.getElementById('social-status').innerText : '30',
+            xpSchool: schoolXPValue, // ИСПРАВЛЕНО: Теперь пишется корректное значение
+            xpTotal: document.getElementById('xp-total') ? document.getElementById('xp-total').innerText : '0',
+            xpCurrent: document.getElementById('xp-current') ? document.getElementById('xp-current').innerText : '0',
+            xpEarned: document.getElementById('xp-earned') ? document.getElementById('xp-earned').innerText : '0'
+        };
+        
+        try {
+            localStorage.setItem(this.currentSlot, JSON.stringify(pack));
+            let list = this.getCharacterList();
+            let me = list.find(c => c.id === this.currentSlot);
+            if (me && me.name !== charName) {
+                me.name = charName;
+                localStorage.setItem('l5r_character_list', JSON.stringify(list));
+            }
+        } catch(e) { console.warn("Временный режим: localStorage недоступен"); }
+    },        
+        
     loadCharacter: function() {
         let dataJson = null;
         try {
             dataJson = localStorage.getItem(this.currentSlot);
         } catch(e) {
-            // Если память заблокирована CodePen, отдаем чистый пакет без предвыбранной школы
             dataJson = JSON.stringify({ texts: ['Новый Самурай', '', '', '', '1', ''] });
         }
 
@@ -4659,7 +4663,6 @@ const L5R = {
         if (pack.texts && pack.texts.length === ids.length) {
             ids.forEach((id, idx) => { const el = document.getElementById(id); if (el) el.value = pack.texts[idx]; });
         }
-        // ... весь остальной код функции loadCharacter ниже остается без изменений ...
 
         if (pack.rings) {
             Object.keys(pack.rings).forEach(r => { if(document.getElementById(r)) document.getElementById(r).innerText = pack.rings[r]; });
@@ -4669,7 +4672,7 @@ const L5R = {
         }
         window.currentWoundsCount = pack.curWounds || 0;
         window.currentStrifeCount = pack.curStrife || 0;
-        if (document.getElementById('curVoidPoints')) document.getElementById('curVoidPoints').innerText = pack.curVoid || '1'; // <-- ИСПРАВЛЕНО
+        if (document.getElementById('curVoidPoints')) document.getElementById('curVoidPoints').innerText = pack.curVoid || '1';
         window.characterTechniques = pack.techniques || [];
         window.characterTraits = pack.traits || [];
         this.renderTraits();
@@ -4677,11 +4680,11 @@ const L5R = {
         if (document.getElementById('money-koku')) document.getElementById('money-koku').innerText = pack.koku || '0';
         if (document.getElementById('money-bu')) document.getElementById('money-bu').innerText = pack.bu || '0';
         if (document.getElementById('money-zeni')) document.getElementById('money-zeni').innerText = pack.zeni || '0';
-                window.characterInventory = pack.inventory || [];
+        window.characterInventory = pack.inventory || [];
         this.renderInventory();
         
-        window.characterStatuses = pack.statuses || {}; // <-- ДОБАВЛЕНО ТУТ
-        this.renderStatuses();                           // <-- ДОБАВЛЕНО ТУТ для отрисовки при входе
+        window.characterStatuses = pack.statuses || {};
+        this.renderStatuses();
         window.characterStance = pack.stance || '';
         this.renderStances();
         
@@ -4689,6 +4692,7 @@ const L5R = {
         if (document.getElementById('social-glory')) document.getElementById('social-glory').innerText = pack.glory !== undefined ? pack.glory : 30;
         if (document.getElementById('social-status')) document.getElementById('social-status').innerText = pack.status !== undefined ? pack.status : 30;
         
+        // ИСПРАВЛЕНО: Синхронно разносим загруженный опыт по всем элементам класса
         const sVal = pack.xpSchool || '0';
         document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = sVal);
         
@@ -4701,12 +4705,10 @@ const L5R = {
         document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = cXP);
     },
 
-    
     calc: function() {
         const getVal = (id) => { const el = document.getElementById(id); return el ? (parseInt(el.innerText) || 1) : 1; };
         const air = getVal('air'), earth = getVal('earth'), fire = getVal('fire'), water = getVal('water'), voidR = getVal('void');
         
-        // ВЫЧИСЛЕНИЯ: Бдительность теперь округляется строго В БОЛЬШУЮ СТОРОНУ
         const stamina = (earth + fire) * 2;
         const composure = (earth + water) * 2;
         const focus = air + fire;
@@ -4727,14 +4729,13 @@ const L5R = {
         const barS = document.getElementById('barStrife');
         if (barS) {
             barS.style.width = composure > 0 ? Math.min(100, (window.currentStrifeCount / composure * 100)) + '%' : '0%';
-        if (window.currentStrifeCount >= composure && composure > 0) barS.classList.add('bar-unmasked');
-        else barS.classList.remove('bar-unmasked');
+            if (window.currentStrifeCount >= composure && composure > 0) barS.classList.add('bar-unmasked');
+            else barS.classList.remove('bar-unmasked');
         }
         const nameEl = document.getElementById('bio-name');
         const badge = document.getElementById('current-char-badge');
         if (badge && nameEl) badge.innerText = nameEl.value || 'Новый Самурай';
 
-                // МГНОВЕННАЯ СИНХРОНИЗАЦИЯ ВСЕХ ДАННЫХ ДЛЯ РЕЖИМА ИГРЫ
         const fields = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
         fields.forEach(id => {
             const inputEl = document.getElementById(id);
@@ -4742,15 +4743,15 @@ const L5R = {
             if (inputEl && textEl) { textEl.innerText = inputEl.value.trim(); }
         });
 
-        // Расчет максимумов опыта и синхронизация игрового экрана
         const rVal = parseInt(document.getElementById('bio-rank')?.value) || 1;
-        const tList = { 1: 20, 2: 24, 3: 32, 4: 44, 5: 60 };
-        document.querySelectorAll('.xp-max-val').forEach(el => el.innerText = tList[rVal] || 60);
+        const thresholds = { 1: 20, 2: 24, 3: 32, 4: 44, 5: 60 };
+        document.querySelectorAll('.xp-max-val').forEach(el => el.innerText = thresholds[rVal] || 60);
 
         const cXP = document.getElementById('xp-current') ? document.getElementById('xp-current').innerText : '0';
         document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = cXP);
         
-        const firstSchoolEl = document.querySelectorAll('.xp-school-val')[0];
+        // ИСПРАВЛЕНО: Безопасное удерживание данных опыта при расчетах без сброса в 0
+        const firstSchoolEl = document.querySelector('.xp-school-val');
         const sXP = firstSchoolEl ? firstSchoolEl.innerText : '0';
         document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = sXP);
 
