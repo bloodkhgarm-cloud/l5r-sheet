@@ -580,20 +580,20 @@
                 <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_gam', 1)">+</button>
             </div>
         </div>
-        <div class="skill-item">
+                <div class="skill-item">
             <span class="skill-name">Командование (Command)</span>
+            <div class="ring-controls">
+                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_cmd', -1)">-</button>
+                <span class="skill-value" id="sk_cmd">0</span>
+                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_cmd', 1)">+</button>
+            </div>
+        </div>
+                <div class="skill-item">
+            <span class="skill-name">Учтивость (Courtesy)</span>
             <div class="ring-controls">
                 <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_crs', -1)">-</button>
                 <span class="skill-value" id="sk_crs">0</span>
                 <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_crs', 1)">+</button>
-            </div>
-        </div>
-        <div class="skill-item">
-            <span class="skill-name">Учтивость (Courtesy)</span>
-            <div class="ring-controls">
-                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_psn', -1)">-</button>
-                <span class="skill-value" id="sk_psn">0</span>
-                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_psn', 1)">+</button>
             </div>
         </div>
     </details>
@@ -4534,8 +4534,13 @@ const L5R = {
 
         const nameEl = document.getElementById('bio-name');
         if (nameEl) nameEl.value = defaultName;
+        
+        // ПРОСТО ДОБАВЛЯЕМ ЭТИ ДВЕ СТРОЧКИ СЮДА:
+        const rankEl = document.getElementById('bio-rank');
+        if (rankEl) rankEl.value = '1'; // Устанавливаем базовый 1 ранг
+        
         ['air', 'earth', 'fire', 'water', 'void'].forEach(r => {
-            if(document.getElementById(r)) document.getElementById(r).innerText = '1';
+        if(document.getElementById(r)) document.getElementById(r).innerText = '1';
         });
         document.querySelectorAll('.skill-value').forEach(s => s.innerText = '0');
         window.currentWoundsCount = 0;
@@ -4589,7 +4594,7 @@ const L5R = {
         }
     },
 
-    changeStat: function(category, statId, amount) {
+        changeStat: function(category, statId, amount) {
         if (this.isLockMode) return;
         const el = document.getElementById(statId);
         if (!el) return;
@@ -4598,10 +4603,11 @@ const L5R = {
         let min = category === 'rings' ? 1 : 0;
         if (next >= min && next <= 5) {
             el.innerText = next;
-            this.calc();
-            this.saveCharacter();
+            this.saveCharacter(); // Сначала сохраняем изменённое в буфер
+            this.calc();          
         }
     },
+
                 saveCharacter: function() {
         if (!this.currentSlot) return;
         const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
@@ -4755,8 +4761,7 @@ const L5R = {
         const sXP = firstSchoolEl ? firstSchoolEl.innerText : '0';
         document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = sXP);
 
-        this.autoCheckModeAndRender();
-    },
+        },
 
             changeCombatStatus: function(type, amount) {
         if (type === 'wounds') {
@@ -5232,18 +5237,6 @@ function initTechObserver() {
     L5R.initTraitSuggestions(); 
     L5R.initItemSuggestions();
     L5R.applyLockModeUI();
-    
-    const containerEl = document.querySelector('.container');
-    if (containerEl) { 
-        const observer = new MutationObserver((mutations) => { 
-            let shouldRender = false;
-            mutations.forEach(mutation => {
-                if (mutation.attributeName === 'class') { shouldRender = true; }
-            });
-            if (shouldRender) { L5R.autoCheckModeAndRender(); }
-        });
-        observer.observe(containerEl, { attributes: true, attributeFilter: ['class'] }); 
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => initTechObserver());
