@@ -197,7 +197,13 @@
 
     <h1>Лист Самурая (L5R 5e)</h1>
     <button id="modeToggleBtn" class="btn-mode-toggle" onclick="L5R.toggleMode()">🔒 Режим Игры (Нажмите для редактирования)</button>  
-  
+      <!-- БЛОК ЭКСПОРТА И ИМПОРТА ПЕРСОНАЖА -->
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+        <button onclick="L5R.exportToJSON()" style="background: #2a2222; color: #d4af37; border: 1px solid #d4af37; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">📥 Скачать лист персонажа (.json)</button>
+        
+        <button onclick="document.getElementById('l5r-import-file-input').click()" style="background: #2a2222; color: #d4af37; border: 1px solid #d4af37; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">📤 Загрузить лист персонажа</button>
+        <input type="file" id="l5r-import-file-input" accept=".json" onchange="L5R.importFromJSON(this)" style="display: none;">
+    </div>
     
         <!-- ЕДИНЫЙ БЛОК ДАННЫХ ПЕРСОНАЖА -->
     <div style="background: #1e1e1e; border: 1px solid #444; border-radius: 8px; padding: 12px; margin-bottom: 15px;">
@@ -4709,6 +4715,104 @@ const L5R = {
         const cXP = pack.xpCurrent || '0';
         if (document.getElementById('xp-current')) document.getElementById('xp-current').innerText = cXP;
         document.querySelectorAll('.xp-current-view').forEach(el => el.innerText = cXP);
+    },
+        exportToJSON: function() {
+        if (!this.currentSlot) {
+            alert("Самурай, не выбран персонаж для экспорта!");
+            return;
+        }
+        
+        // Сначала принудительно сохраняем актуальные данные из полей в буфер
+        this.saveCharacter();
+        
+        // Забираем готовый пакет данных из LocalStorage
+        const dataJson = localStorage.getItem(this.currentSlot);
+        if (!dataJson) {
+            alert("Не удалось найти данные персонажа в памяти!");
+            return;
+        }
+
+        // Берём имя персонажа для красивого названия файла
+        const nameEl = document.getElementById('bio-name');
+        const fileName = (nameEl ? nameEl.value.trim() : 'samurai') + '_l5r.json';
+
+        // Создаем скрытую ссылку, генерируем Blob и скачиваем файл (работает на ПК и смартфонах)
+        const blob = new Blob([dataJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Наводим за собой порядок в памяти браузера
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 0);
+    },
+
+    importFromJSON: function(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const pack = JSON.parse(e.target.result);
+                
+                // СТРОГАЯ ВАЛИДАЦИЯ: Проверяем, что файл действительно от нашего приложения
+                if (!pack.texts || !pack.rings || !pack.skills) {
+                    alert("Ошибка! Этот файл не является валидным свитком самурая L5R.");
+                    return;
+                }
+
+                // Извлекаем имя самурая из файла
+                const charName = (pack.texts[0] || 'Импортированный Самурай').trim();
+
+                if (!confirm(`Вы действительно хотите импортировать самурая "${charName}"? Если слот занят, текущие данные на экране будут перезаписаны.`)) {
+                    input.value = ''; // Сбрасываем инпут
+                    return;
+                }
+
+                // Если мы зашли со стартового экрана и слот еще не определен, создаем новый
+                if (!this.currentSlot) {
+                    this.currentSlot = 'l5r_char_' + Date.now();
+                }
+
+                // 1. Записываем чистый JSON прямо в текущий рабочий слот LocalStorage
+                localStorage.setItem(this.currentSlot, JSON.stringify(pack));
+
+                // 2. Обновляем глобальный список персонажей, если этого ID там ещё нет
+                let list = this.getCharacterList();
+                let me = list.find(c => c.id === this.currentSlot);
+                if (!me) {
+                    list.push({ id: this.currentSlot, name: charName });
+                    localStorage.setItem('l5r_character_list', JSON.stringify(list));
+                } else if (me.name !== charName) {
+                    me.name = charName;
+                    localStorage.setItem('l5r_character_list', JSON.stringify(list));
+                }
+
+                // 3. Принудительно загружаем новые данные на экран и пересчитываем вторичные параметры
+                this.loadCharacter();
+                
+                // Переводим лист в Режим Игры для безопасного просмотра
+                this.isLockMode = true;
+                this.applyLockModeUI();
+
+                alert(`🌸 Свиток судьбы успешно прочитан! Добро пожаловать, ${charName}-сан.`);
+
+            } catch (err) {
+                alert("Критическая ошибка при чтении файла JSON! Возможно, файл поврежден.");
+                console.error(err);
+            }
+            
+            // Сбрасываем инпут, чтобы можно было загрузить тот же файл повторно при необходимости
+            input.value = '';
+        };
+        
+        reader.readAsText(file);
     },
 
     calc: function() {
