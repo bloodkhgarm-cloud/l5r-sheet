@@ -597,9 +597,9 @@
                 <div class="skill-item">
             <span class="skill-name">Учтивость (Courtesy)</span>
             <div class="ring-controls">
-                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_crs', -1)">-</button>
-                <span class="skill-value" id="sk_crs">0</span>
-                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_crs', 1)">+</button>
+                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_cou', -1)">-</button>
+                <span class="skill-value" id="sk_cou">0</span>
+                <button class="btn-skill" onclick="L5R.changeStat('skills', 'sk_cou', 1)">+</button>
             </div>
         </div>
     </details>
@@ -4521,10 +4521,15 @@ const L5R = {
     },
 
     showStartScreen: function() {
+        // Жестко фиксируем все изменения перед выходом в главное меню
+        if (this.currentSlot) {
+            this.saveCharacter();
+        }
         document.getElementById('main-character-sheet').style.display = 'none';
         document.getElementById('start-screen').style.display = 'flex';
         this.renderStartScreenList();
     },
+
 
     selectAndOpenCharacter: function(id) {
         this.currentSlot = id;
@@ -4548,7 +4553,7 @@ const L5R = {
         ['air', 'earth', 'fire', 'water', 'void'].forEach(r => {
         if(document.getElementById(r)) document.getElementById(r).innerText = '1';
         });
-        document.querySelectorAll('.skill-value').forEach(s => s.innerText = '0');
+        document.querySelectorAll('.skill-value').forEach(s => s.textContent = '0');
         window.currentWoundsCount = 0;
         window.currentStrifeCount = 0;
         window.characterInventory = [];
@@ -4600,22 +4605,28 @@ const L5R = {
         }
     },
 
-        changeStat: function(category, statId, amount) {
+    changeStat: function(category, statId, amount) {
         if (this.isLockMode) return;
         const el = document.getElementById(statId);
         if (!el) return;
-        let current = parseInt(el.innerText) || 0;
+        let current = parseInt(el.textContent) || 0;
         let next = current + amount;
         let min = category === 'rings' ? 1 : 0;
         if (next >= min && next <= 5) {
-            el.innerText = next;
-            this.saveCharacter(); // Сначала сохраняем изменённое в буфер
+            el.textContent = next;
+            this.saveCharacter(); 
             this.calc();          
         }
     },
 
-                saveCharacter: function() {
+    saveCharacter: function() {
         if (!this.currentSlot) return;
+        
+        // Если бланк скрыт и мы находимся на стартовом экране, блокируем запись "пустоты"
+        if (document.getElementById('main-character-sheet').style.display === 'none') {
+            return;
+        }
+
         const ids = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
         const textValues = ids.map(id => document.getElementById(id) ? document.getElementById(id).value : '');
         const nameEl = document.getElementById('bio-name');
@@ -4625,8 +4636,8 @@ const L5R = {
             const el = document.getElementById(r); if (el) rings[r] = el.innerText; 
         });
         const skills = {};
-        document.querySelectorAll('.skill-value').forEach(s => { skills[s.id] = s.innerText; });
-        
+        document.querySelectorAll('.skill-value').forEach(s => { skills[s.id] = s.textContent; });
+
         // ИСПРАВЛЕНО: Безопасное чтение опыта "В путь школы" через класс
         const schoolXPCountEl = document.querySelector('.xp-school-val');
         const schoolXPValue = schoolXPCountEl ? schoolXPCountEl.innerText : '0';
@@ -4680,7 +4691,7 @@ const L5R = {
             Object.keys(pack.rings).forEach(r => { if(document.getElementById(r)) document.getElementById(r).innerText = pack.rings[r]; });
         }
         if (pack.skills) {
-            Object.keys(pack.skills).forEach(sId => { if(document.getElementById(sId)) document.getElementById(sId).innerText = pack.skills[sId]; });
+            Object.keys(pack.skills).forEach(sId => { if(document.getElementById(sId)) document.getElementById(sId).textContent = pack.skills[sId]; });
         }
         window.currentWoundsCount = pack.curWounds || 0;
         window.currentStrifeCount = pack.curStrife || 0;
