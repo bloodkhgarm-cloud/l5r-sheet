@@ -5,21 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>L5R 5e Лист Персонажа</title>
     <style>
+        /* ОФОРМЛЕНИЕ ПО КЛАНАМ: базовая (классическая) палитра и наборы цветов кланов.
+           Класс clan-* вешается на body в зависимости от школы персонажа. */
+        :root {
+            --c-primary: #8b0000;      /* рамки, кнопки */
+            --c-dark: #5a1a1a;         /* тёмные кнопки и разделители */
+            --c-accent: #d4af37;       /* заголовки и акценты */
+            --c-accent-rgb: 212,175,55;
+            --c-bg: #121212;           /* фон страницы */
+            --c-panel: #1c1c1c;        /* фон листа */
+            --c-tint: transparent;     /* цветное свечение фона сверху */
+        }
+        /* Краб: тёмный индиго и железо (серая сталь). Журавль: светлое небо и белое серебро */
+        body.clan-crab     { --c-primary: #2b3f73; --c-dark: #1a2547; --c-accent: #a9b2bd; --c-accent-rgb: 169,178,189; --c-bg: #151b2c; --c-panel: #161a24; --c-tint: rgba(43,63,115,0.6); }
+        body.clan-crane    { --c-primary: #5ba7d4; --c-dark: #2e6a8e; --c-accent: #f2f8fc; --c-accent-rgb: 242,248,252; --c-bg: #1f3443; --c-panel: #1a2631; --c-tint: rgba(120,190,230,0.55); }
+        body.clan-dragon   { --c-primary: #2e7d4f; --c-dark: #1a4a2e; --c-accent: #d4af37; --c-accent-rgb: 212,175,55; --c-bg: #15281c; --c-panel: #16201a; --c-tint: rgba(46,125,79,0.65); }
+        body.clan-lion     { --c-primary: #a87408; --c-dark: #6b4e10; --c-accent: #f2c94c; --c-accent-rgb: 242,201,76; --c-bg: #2a2010; --c-panel: #1f1a10; --c-tint: rgba(184,134,11,0.6); }
+        body.clan-phoenix  { --c-primary: #c4561a; --c-dark: #7a3410; --c-accent: #ffb347; --c-accent-rgb: 255,179,71; --c-bg: #2c1911; --c-panel: #211610; --c-tint: rgba(210,96,26,0.6); }
+        body.clan-scorpion { --c-primary: #b3001b; --c-dark: #4a0010; --c-accent: #d9d9d9; --c-accent-rgb: 217,217,217; --c-bg: #220a0f; --c-panel: #151012; --c-tint: rgba(179,0,27,0.55); }
+        body.clan-unicorn  { --c-primary: #5b4580; --c-dark: #352a4a; --c-accent: #cfc3e3; --c-accent-rgb: 207,195,227; --c-bg: #1c1824; --c-panel: #1a1720; --c-tint: rgba(91,69,128,0.4); }
+        body.clan-imperial { --c-primary: #2f6b3a; --c-dark: #1e4226; --c-accent: #f5d76e; --c-accent-rgb: 245,215,110; --c-bg: #1d2614; --c-panel: #1a1e16; --c-tint: rgba(201,162,39,0.5); }
+        body.clan-mantis   { --c-primary: #1f8a7a; --c-dark: #145248; --c-accent: #7fe0c8; --c-accent-rgb: 127,224,200; --c-bg: #132a27; --c-panel: #141f1d; --c-tint: rgba(31,138,122,0.6); }
+        body.clan-other    { --c-primary: #75665a; --c-dark: #4a3f37; --c-accent: #c8b88a; --c-accent-rgb: 200,184,138; --c-bg: #202020; --c-panel: #1b1b1b; --c-tint: rgba(150,150,150,0.4); }
         .skills-category { background: #222; border: 1px solid #444; border-radius: 8px; padding: 12px; margin-top: 12px; outline: none; }
-        .skills-category summary { font-size: 14px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none; }
-        .skills-category summary::after { content: '▼'; font-size: 10px; color: #d4af37; transition: transform 0.2s; }
+        .skills-category summary { font-size: 14px; font-weight: bold; color: var(--c-accent); text-transform: uppercase; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+        .skills-category summary::after { content: '▼'; font-size: 10px; color: var(--c-accent); transition: transform 0.2s; }
         .skills-category[open] summary::after { transform: rotate(180deg); }
-        .skills-category[open] summary { border-bottom: 1px solid #5a1a1a; margin-bottom: 8px; }
+        .skills-category[open] summary { border-bottom: 1px solid var(--c-dark); margin-bottom: 8px; }
+        /* Группы навыков: свой цвет, полоса слева и иероглиф группы в правом верхнем углу */
+        .skills-category.skill-group {
+            position: relative; overflow: hidden;
+            background: linear-gradient(160deg, rgba(var(--g-rgb),0.20), #222 55%);
+            border: 1px solid rgba(var(--g-rgb),0.40); border-left: 4px solid rgb(var(--g-rgb));
+        }
+        .skills-category.skill-group::before {
+            content: attr(data-kanji);
+            position: absolute; right: 34px; top: 4px;
+            font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Noto Serif CJK JP", "MS Mincho", serif;
+            font-size: 56px; line-height: 1; color: rgba(var(--g-rgb),0.20);
+            pointer-events: none; z-index: 0;
+        }
+        .skills-category.skill-group > * { position: relative; z-index: 1; }
+        .skills-category.skill-group summary,
+        .skills-category.skill-group summary::after { color: rgb(var(--g-rgb)); }
+        .skills-category.skill-group[open] summary { border-bottom-color: rgba(var(--g-rgb),0.45); }
+        .skills-category.skill-group .skill-item { border-bottom-color: rgba(var(--g-rgb),0.18); }
+        .skill-artisan { --g-rgb: 214,130,170; }  /* Ремесленные: цвет сакуры */
+        .skill-martial { --g-rgb: 205,60,50; }    /* Боевые: алый */
+        .skill-scholar { --g-rgb: 90,140,210; }   /* Учёные: синий */
+        .skill-social  { --g-rgb: 214,170,50; }   /* Социальные: золотой */
+        .skill-trade   { --g-rgb: 110,160,80; }   /* Трудовые: зелёный */
         .skill-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed #333; }
         .skill-item:last-child { border-bottom: none; }
         .skill-name { font-size: 14px; color: #e0e0e0; }
-        .btn-skill { background: #5a1a1a; color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; user-select: none; }
-        .btn-skill:active { background: #d4af37; color: #000; }
+        .btn-skill { background: var(--c-dark); color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; user-select: none; }
+        .btn-skill:active { background: var(--c-accent); color: #000; }
         .skill-value { font-size: 16px; font-weight: bold; color: #fff; min-width: 20px; text-align: center; }
-        body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; padding: 15px; margin: 0; }
-        .container { max-width: 500px; margin: 0 auto; background: #1c1c1c; border: 2px solid #8b0000; border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        h1 { color: #d4af37; text-align: center; font-size: 24px; border-bottom: 2px solid #8b0000; padding-bottom: 10px; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
-        h2 { color: #d4af37; font-size: 18px; margin-top: 20px; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        body { background-color: var(--c-bg); background-image: radial-gradient(ellipse at top, var(--c-tint), transparent 90%); background-attachment: fixed; color: #e0e0e0; font-family: sans-serif; padding: 15px; margin: 0; transition: background-color 0.4s; }
+        .container { max-width: 500px; margin: 0 auto; background: var(--c-panel); border: 2px solid var(--c-primary); border-radius: 12px; padding: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        h1 { color: var(--c-accent); text-align: center; font-size: 24px; border-bottom: 2px solid var(--c-primary); padding-bottom: 10px; margin-top: 0; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { color: var(--c-accent); font-size: 18px; margin-top: 20px; border-bottom: 1px solid #444; padding-bottom: 5px; }
         .input-group { margin-bottom: 12px; }
         /* Защита верхнего имени от налезания на кнопку */
         #current-char-badge {
@@ -31,22 +76,58 @@
         }
         label { display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         input, textarea, select { width: 100%; padding: 10px; background: #2a2a2a; border: 1px solid #444; border-radius: 6px; color: #fff; box-sizing: border-box; font-size: 14px; }
-        input:focus, textarea:focus, select:focus { border-color: #d4af37; outline: none; }
+        input:focus, textarea:focus, select:focus { border-color: var(--c-accent); outline: none; }
         /* Защита игрового режима от распирания экстремально длинными словами */
         .game-only {
             word-break: break-word;
             overflow-wrap: break-word;
         }
-        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .ring-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
-        .ring-card { background: #252525; border: 1px solid #333; border-radius: 8px; padding: 10px; text-align: center; border-left: 4px solid #8b0000; }
-        .ring-name { font-weight: bold; color: #fff; font-size: 15px; margin-bottom: 8px; }
+        .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .ring-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
+        /* Ячейки колец в цветах стихий: цветной градиент, полоса слева и крупный иероглиф стихии на фоне */
+        .ring-card {
+            --el-rgb: 139,0,0;
+            position: relative; overflow: hidden;
+            background: linear-gradient(145deg, rgba(var(--el-rgb),0.30), #222 65%);
+            border: 1px solid rgba(var(--el-rgb),0.45); border-left: 4px solid rgb(var(--el-rgb));
+            border-radius: 8px; padding: 10px; text-align: center;
+            box-shadow: inset 0 0 18px rgba(var(--el-rgb),0.12);
+        }
+        .ring-card::before {
+            content: attr(data-kanji);
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Noto Serif CJK JP", "MS Mincho", serif;
+            font-size: 64px; line-height: 1; color: rgba(var(--el-rgb),0.22);
+            pointer-events: none; z-index: 0;
+        }
+        .ring-card > * { position: relative; z-index: 1; }
+        .ring-card.ring-air   { --el-rgb: 143,196,214; }  /* Воздух: небесно-голубой */
+        .ring-card.ring-earth { --el-rgb: 168,140,82; }   /* Земля: охра */
+        .ring-card.ring-fire  { --el-rgb: 226,88,44; }    /* Огонь: алый */
+        .ring-card.ring-water { --el-rgb: 64,128,214; }   /* Вода: синий */
+        .ring-card.ring-void  { --el-rgb: 150,110,200; }  /* Пустота: фиолетовый */
+        .ring-name { font-weight: bold; color: rgb(var(--el-rgb, 255,255,255)); font-size: 15px; margin-bottom: 8px; letter-spacing: 0.5px; }
         .ring-controls { display: flex; justify-content: center; align-items: center; gap: 15px; }
-        .btn-ring { background: #8b0000; color: white; border: none; width: 35px; height: 35px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; user-select: none; }
-        .btn-ring:active { background: #d4af37; color: #000; }
-        .ring-value { font-size: 22px; font-weight: bold; color: #d4af37; min-width: 25px; }
-        .attr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
-        .attr-card { background: #2a2222; border: 1px solid #5a1a1a; border-radius: 8px; padding: 12px; text-align: center; }
+        .btn-ring { background: var(--c-primary); color: white; border: none; width: 35px; height: 35px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; user-select: none; }
+        .btn-ring:active { background: var(--c-accent); color: #000; }
+        .ring-value { font-size: 22px; font-weight: bold; color: var(--c-accent); min-width: 25px; }
+        .attr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 15px; }
+        /* Вторичные атрибуты в азиатском стиле: двойная рамка как у ширмы и иероглиф на фоне */
+        .attr-card {
+            position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #272020, #1c1818);
+            border: 1px solid var(--c-dark); border-top: 2px solid var(--c-primary); border-radius: 3px;
+            padding: 12px; text-align: center;
+            box-shadow: inset 0 0 0 3px #1c1818, inset 0 0 0 4px rgba(var(--c-accent-rgb),0.30);
+        }
+        .attr-card::before {
+            content: attr(data-kanji);
+            position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+            font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", "Noto Serif CJK JP", "MS Mincho", serif;
+            font-size: 44px; line-height: 1; color: rgba(var(--c-accent-rgb),0.16);
+            pointer-events: none; z-index: 0;
+        }
+        .attr-card > * { position: relative; z-index: 1; }
         .attr-name { font-size: 12px; color: #bbb; text-transform: uppercase; margin-bottom: 5px; }
         .attr-value { font-size: 22px; font-weight: bold; color: #fff; }
         .status-box { background: #222; border: 1px solid #444; border-radius: 8px; padding: 12px; margin-top: 12px; }
@@ -58,13 +139,13 @@
         .bar-unmasked { background-color: #ff1100 !important; box-shadow: 0 0 8px #ff1100; }
         .lock-mode .btn-ring, .lock-mode .btn-skill, .lock-mode .btn-xp-ctrl { display: none !important; }
         .lock-mode input, .lock-mode textarea, .lock-mode select { background: #151515 !important; border-color: #222 !important; pointer-events: none; }
-        .btn-mode-toggle { width: 100%; background: #d4af37; color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 6px; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-mode-toggle { width: 100%; background: var(--c-accent); color: #000; border: none; padding: 12px; font-size: 15px; font-weight: bold; border-radius: 6px; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn-mode-toggle.editing { background: #2e7d32; color: #fff; }
-        #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; background-color: #121212; }
-        .welcome-box { max-width: 450px; width: 100%; background: #1c1c1c; border: 2px solid #8b0000; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.7); text-align: center; }
+        #start-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; background-color: var(--c-bg); }
+        .welcome-box { max-width: 450px; width: 100%; background: var(--c-panel); border: 2px solid var(--c-primary); border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.7); text-align: center; }
         .char-list-container { margin: 20px 0; display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
-        .btn-char-select { width: 100%; background: #252525; color: #fff; border: 1px solid #444; border-left: 5px solid #d4af37; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
-        .btn-char-select:hover { background: #2a2222; border-color: #5a1a1a; border-left-color: #8b0000; }
+        .btn-char-select { width: 100%; background: #252525; color: #fff; border: 1px solid #444; border-left: 5px solid var(--c-accent); padding: 14px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; text-align: left; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .btn-char-select:hover { background: #2a2222; border-color: var(--c-dark); border-left-color: var(--c-primary); }
         /* Фикс для красивого сокращения имени на кнопке */
         .btn-char-select span {
             white-space: nowrap;
@@ -78,11 +159,11 @@
             flex-shrink: 0; /* Не дает крестику сжиматься или переноситься */
         }
         .btn-char-delete:hover { transform: scale(1.2); }
-        .btn-char-create { width: 100%; background: #5a1a1a; color: white; border: 1px solid #8b0000; padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
-        .btn-char-create:hover { background: #8b0000; }
+        .btn-char-create { width: 100%; background: var(--c-dark); color: white; border: 1px solid var(--c-primary); padding: 12px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; }
+        .btn-char-create:hover { background: var(--c-primary); }
         /* МОБИЛЬНАЯ АДАПТАЦИЯ ИНТЕРФЕЙСА ДЛЯ СМАРТФОНОВ */
         @media (max-width: 480px) {
-            body { padding: 6px; background-color: #0b0b0b; }
+            body { padding: 6px; background-color: var(--c-bg); }
             .container { padding: 10px; border-width: 1px; border-radius: 8px; box-shadow: none; max-width: 100%; }
             h1 { font-size: 18px; padding-bottom: 6px; margin-bottom: 12px; }
             h2 { font-size: 14px; margin-top: 15px; padding-bottom: 3px; }
@@ -92,7 +173,7 @@
             .btn-mode-toggle { padding: 10px; font-size: 11px; letter-spacing: 0.5px; }
 
             /* АДАПТАЦИЯ КОЛЕЦ И ХАРАКТЕРИСТИК */
-            .ring-grid { grid-template-columns: 1fr; gap: 6px; }
+            .ring-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; } /* две равные колонки, как у остальных блоков; Пустота занимает всю ширину */
             .ring-card {
                 padding: 10px 8px;
                 display: flex;
@@ -107,7 +188,7 @@
             .btn-ring { width: 30px !important; height: 30px !important; font-size: 14px !important; }
             .ring-controls { gap: 8px !important; }
             .ring-value { font-size: 16px !important; min-width: 20px; }
-            .attr-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+            .attr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
             .attr-card { padding: 8px; }
             .attr-name { font-size: 10px; }
             .attr-value { font-size: 16px; }
@@ -145,8 +226,8 @@
 
         /* Красивое золотое свечение школы в режиме игры */
         #bio-school-text:hover {
-            border-color: #d4af37 !important;
-            box-shadow: 0 0 8px rgba(212,175,55,0.4);
+            border-color: var(--c-accent) !important;
+            box-shadow: 0 0 8px rgba(var(--c-accent-rgb),0.4);
             background: #3a2e2e !important;
         }
 
@@ -157,7 +238,7 @@
     <div class="welcome-box">
         <h1 style="margin-bottom: 5px; font-size: 22px;">Легенда Пяти Колец</h1>
         <div style="color: #aaa; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Книга Записей Самураев</div>
-        <label style="display: block; color: #d4af37; font-size: 11px; text-align: left; text-transform: uppercase; letter-spacing: 0.5px;">Выберите вашего персонажа:</label>
+        <label style="display: block; color: var(--c-accent); font-size: 11px; text-align: left; text-transform: uppercase; letter-spacing: 0.5px;">Выберите вашего персонажа:</label>
         <div class="char-list-container" id="start-char-list"></div>
         <hr style="border: 0; border-top: 1px solid #333; margin: 15px 0;">
         <button class="btn-char-create" onclick="L5R.createNewCharacter()">✨ Воспитать нового самурая</button>
@@ -167,16 +248,16 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px dashed #444; padding-bottom: 10px;">
         <button onclick="L5R.showStartScreen()" style="background: #333; color: #aaa; border: 1px solid #444; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">⬅ В меню</button>
-        <div id="current-char-badge" style="color: #d4af37; font-weight: bold; font-size: 13px; text-transform: uppercase;"></div>
+        <div id="current-char-badge" style="color: var(--c-accent); font-weight: bold; font-size: 13px; text-transform: uppercase;"></div>
     </div>
 
     <h1>Лист Самурая (L5R 5e)</h1>
     <button id="modeToggleBtn" class="btn-mode-toggle" onclick="L5R.toggleMode()">🔒 Режим Игры (Нажмите для редактирования)</button>
     <!-- БЛОК ЭКСПОРТА И ИМПОРТА ПЕРСОНАЖА -->
     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
-        <button onclick="L5R.exportToJSON()" style="background: #2a2222; color: #d4af37; border: 1px solid #d4af37; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">📥 Скачать лист персонажа (.json)</button>
+        <button onclick="L5R.exportToJSON()" style="background: #2a2222; color: var(--c-accent); border: 1px solid var(--c-accent); padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">📥 Скачать лист персонажа (.json)</button>
 
-        <button onclick="document.getElementById('l5r-import-file-input').click()" style="background: #2a2222; color: #d4af37; border: 1px solid #d4af37; padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">📤 Загрузить лист персонажа</button>
+        <button onclick="document.getElementById('l5r-import-file-input').click()" style="background: #2a2222; color: var(--c-accent); border: 1px solid var(--c-accent); padding: 10px; font-size: 13px; font-weight: bold; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;">📤 Загрузить лист персонажа</button>
         <input type="file" id="l5r-import-file-input" accept=".json" onchange="L5R.importFromJSON(this)" style="display: none;">
     </div>
 
@@ -203,7 +284,7 @@
                 <input type="text" id="bio-school" list="l5r-schools-suggestions" placeholder="Начните вводить школу..." class="edit-only" oninput="L5R.checkSchoolSearch(this.value)">
                 <datalist id="l5r-schools-suggestions"></datalist>
 
-                <div id="bio-school-text" onclick="L5R.openSchoolModal()" class="game-only" style="padding: 10px; background: #2a2222; border: 1px solid #d4af37; border-radius: 6px; color: #d4af37; font-size: 14px; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; min-height: 38px; box-sizing: border-box;"></div>
+                <div id="bio-school-text" onclick="L5R.openSchoolModal()" class="game-only" style="padding: 10px; background: #2a2222; border: 1px solid var(--c-accent); border-radius: 6px; color: var(--c-accent); font-size: 14px; font-weight: bold; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; min-height: 38px; box-sizing: border-box;"></div>
             </div>
         </div>
 
@@ -224,7 +305,7 @@
         <!-- СВЕРНУТАЯ ИСТОРИЯ САМУРАЯ -->
         <div class="input-group" style="margin-top: 15px;">
             <details style="background: #222; border: 1px solid #444; border-radius: 6px; padding: 10px; box-sizing: border-box;">
-                <summary style="font-size: 11px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; user-select: none; outline: none;">📜 Показать/скрыть историю самурая</summary>
+                <summary style="font-size: 11px; font-weight: bold; color: var(--c-accent); text-transform: uppercase; cursor: pointer; user-select: none; outline: none;">📜 Показать/скрыть историю самурая</summary>
 
                 <div style="margin-top: 10px;">
                     <!-- Поле ввода (видно только в режиме правки) -->
@@ -245,7 +326,7 @@
 
         <!-- Опыт в путь школы -->
         <div style="text-align: center; border-right: 1px dashed #444; padding-right: 4px;">
-            <div style="font-size: 10px; color: #d4af37; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">В путь школы</div>
+            <div style="font-size: 10px; color: var(--c-accent); text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">В путь школы</div>
             <div class="edit-only" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
                 <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0;" onclick="L5R.changeXP('school', -1)">-</button>
                 <span style="font-size: 14px; font-weight: bold; color: #fff; min-width: 35px;"><span class="xp-school-val">0</span>/<span class="xp-max-val">20</span></span>
@@ -260,7 +341,7 @@
         <div style="text-align: center; border-right: 1px dashed #444; padding: 0 4px;">
             <div style="font-size: 10px; color: #aaa; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Всего потрачено</div>
             <div class="edit-only" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
-                <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #5a1a1a;" onclick="L5R.changeXP('total', -1)">-</button>
+                <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: var(--c-dark);" onclick="L5R.changeXP('total', -1)">-</button>
                 <span id="xp-total" style="font-size: 16px; font-weight: bold; color: #fff; min-width: 28px;">0</span>
                 <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #1b5e20;" onclick="L5R.changeXP('total', 1)">+</button>
             </div>
@@ -273,7 +354,7 @@
         <div style="text-align: center; padding-left: 4px;">
             <div style="font-size: 10px; color: #2e7d32; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Доступный опыт</div>
             <div class="edit-only" style="display: flex; justify-content: center; align-items: center; gap: 6px;">
-                <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #5a1a1a;" onclick="L5R.changeXP('current', -1)">-</button>
+                <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: var(--c-dark);" onclick="L5R.changeXP('current', -1)">-</button>
                 <span id="xp-current" style="font-size: 16px; font-weight: bold; color: #fff; min-width: 28px;">0</span>
                 <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; background: #1b5e20;" onclick="L5R.changeXP('current', 1)">+</button>
             </div>
@@ -288,7 +369,7 @@
 
 
     <div class="ring-grid">
-        <div class="ring-card">
+        <div class="ring-card ring-air" data-kanji="風">
             <div class="ring-name">Воздух</div>
             <div class="ring-controls">
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'air', -1)">-</button>
@@ -296,7 +377,7 @@
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'air', 1)">+</button>
             </div>
         </div>
-        <div class="ring-card">
+        <div class="ring-card ring-earth" data-kanji="土">
             <div class="ring-name">Земля</div>
             <div class="ring-controls">
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'earth', -1)">-</button>
@@ -304,7 +385,7 @@
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'earth', 1)">+</button>
             </div>
         </div>
-        <div class="ring-card">
+        <div class="ring-card ring-fire" data-kanji="火">
             <div class="ring-name">Огонь</div>
             <div class="ring-controls">
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'fire', -1)">-</button>
@@ -312,7 +393,7 @@
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'fire', 1)">+</button>
             </div>
         </div>
-        <div class="ring-card">
+        <div class="ring-card ring-water" data-kanji="水">
             <div class="ring-name">Вода</div>
             <div class="ring-controls">
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'water', -1)">-</button>
@@ -320,7 +401,7 @@
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'water', 1)">+</button>
             </div>
         </div>
-        <div class="ring-card" style="grid-column: span 2;">
+        <div class="ring-card ring-void" data-kanji="空" style="grid-column: span 2;">
             <div class="ring-name">Пустота</div>
             <div class="ring-controls">
                 <button class="btn-ring" onclick="L5R.changeStat('rings', 'void', -1)">-</button>
@@ -345,7 +426,7 @@
 
         <!-- СЛАВА -->
         <div style="text-align: center; border-right: 1px dashed #444; padding: 0 4px;">
-            <div style="font-size: 11px; color: #d4af37; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Слава (Glory)</div>
+            <div style="font-size: 11px; color: var(--c-accent); text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Слава (Glory)</div>
             <div style="display: flex; justify-content: center; align-items: center; gap: 6px;">
                 <button class="btn-ring" style="width: 24px; height: 24px; font-size: 12px; padding:0; display: inline-block !important;" onclick="L5R.changeSocial('glory', -1)">-</button>
                 <span id="social-glory" style="font-size: 18px; font-weight: bold; color: #fff; min-width: 28px;">30</span>
@@ -367,13 +448,13 @@
 
     <h2>Вторичные Атрибуты</h2>
     <div class="attr-grid">
-        <div class="attr-card"><div class="attr-name">Выносливость</div><div class="attr-value" id="stamina">0</div></div>
-        <div class="attr-card"><div class="attr-name">Хладнокровие</div><div class="attr-value" id="composure">0</div></div>
-        <div class="attr-card"><div class="attr-name">Концентрация</div><div class="attr-value" id="focus">0</div></div>
-        <div class="attr-card"><div class="attr-name">Бдительность</div><div class="attr-value" id="vigilance">0</div></div>
+        <div class="attr-card" data-kanji="耐"><div class="attr-name">Выносливость</div><div class="attr-value" id="stamina">0</div></div>
+        <div class="attr-card" data-kanji="静"><div class="attr-name">Хладнокровие</div><div class="attr-value" id="composure">0</div></div>
+        <div class="attr-card" data-kanji="集"><div class="attr-name">Концентрация</div><div class="attr-value" id="focus">0</div></div>
+        <div class="attr-card" data-kanji="警"><div class="attr-name">Бдительность</div><div class="attr-value" id="vigilance">0</div></div>
 
         <!-- Оригинальная строка на всю ширину, которая отлично работает и не сдвигает сетку -->
-        <div class="attr-card" style="grid-column: span 2; display: flex; justify-content: space-between; align-items: center; border-color: #d4af37; background: #222215; box-sizing: border-box; padding: 10px 15px;">
+        <div class="attr-card" style="grid-column: span 2; display: flex; justify-content: space-between; align-items: center; border-color: var(--c-accent); background: #222215; box-sizing: border-box; padding: 10px 15px;">
             <div class="attr-name" style="margin: 0; text-transform: uppercase;">Очки Пустоты (Void)</div>
             <div class="ring-controls" style="display: flex; align-items: center; gap: 10px;">
                 <button class="btn-ring" style="width: 28px; height: 28px; font-size: 16px; display: inline-block !important;" onclick="L5R.changeVoidPoints(-1)">-</button>
@@ -384,14 +465,14 @@
     </div>
     <!-- БЛОК ПРЕИМУЩЕСТВ И НЕДОСТАТКОВ -->
     <details id="l5r-traits-main-block" style="margin-top: 20px; border: 1px solid #444; padding: 12px; border-radius: 8px; background: transparent;" open>
-        <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer; margin: 5px 0; user-select: none; color: #d4af37;">
+        <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer; margin: 5px 0; user-select: none; color: var(--c-accent);">
             🎭 Черты характера (Преимущества и Недостатки)
         </summary>
         <div style="padding-top: 10px;">
             <!-- Форма добавления, скрывается в режиме игры -->
-            <div id="trait-edit-form" class="edit-only" style="margin-bottom: 15px; background: #222; padding: 12px; border: 1px dashed #d4af37; border-radius: 8px; color: #fff;">
-                <h4 style="margin: 0 0 8px 0; color: #d4af37; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Добавить черту самурая:</h4>
-                <label style="display: block; color: #d4af37; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold;">🔍 Поиск по книге черт</label>
+            <div id="trait-edit-form" class="edit-only" style="margin-bottom: 15px; background: #222; padding: 12px; border: 1px dashed var(--c-accent); border-radius: 8px; color: #fff;">
+                <h4 style="margin: 0 0 8px 0; color: var(--c-accent); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Добавить черту самурая:</h4>
+                <label style="display: block; color: var(--c-accent); font-size: 11px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold;">🔍 Поиск по книге черт</label>
                 <input type="text" id="trait-search-input" list="l5r-traits-suggestions" placeholder="Начните вводить название..." style="width: 100%; margin-bottom: 12px;" oninput="L5R.checkTraitSearch(this.value)">
                 <datalist id="l5r-traits-suggestions"></datalist>
                 <label style="display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase;">Название черты</label>
@@ -405,14 +486,14 @@
                 </select>
                 <label style="display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase;">Эффект и Описание</label>
                 <textarea id="trait-desc-input" placeholder="Описание эффекта..." rows="2" style="margin-bottom: 12px; font-family: sans-serif; resize: vertical;"></textarea>
-                <button onclick="L5R.addTrait()" style="width: 100%; padding: 10px; background: #5a1a1a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Записать в свиток</button>
+                <button onclick="L5R.addTrait()" style="width: 100%; padding: 10px; background: var(--c-dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Записать в свиток</button>
             </div>
             <div id="trait-categories-container"></div>
         </div>
     </details>
 
     <h2>Навыки Самурая</h2>
-    <details class="skills-category" open>
+    <details class="skills-category skill-group skill-artisan" data-kanji="芸" open>
         <summary>Ремесленные навыки (Artisan)</summary>
         <div class="skill-item">
             <span class="skill-name">Дизайн (Design)</span>
@@ -448,7 +529,7 @@
         </div>
     </details>
 
-    <details class="skills-category" open>
+    <details class="skills-category skill-group skill-martial" data-kanji="武" open>
         <summary>Боевые навыки (Martial)</summary>
         <div class="skill-item">
             <span class="skill-name">Боев. искусства [Безоружный бой]</span>
@@ -499,7 +580,7 @@
             </div>
         </div>
     </details>
-    <details class="skills-category" open>
+    <details class="skills-category skill-group skill-scholar" data-kanji="学" open>
         <summary>Учёные навыки (Scholar)</summary>
         <div class="skill-item">
             <span class="skill-name">Культура (Culture)</span>
@@ -543,7 +624,7 @@
         </div>
     </details>
 
-    <details class="skills-category" open>
+    <details class="skills-category skill-group skill-social" data-kanji="礼" open>
         <summary>Социальные навыки (Social)</summary>
         <div class="skill-item">
             <span class="skill-name">Выступление (Performance)</span>
@@ -579,7 +660,7 @@
         </div>
     </details>
 
-    <details class="skills-category" open>
+    <details class="skills-category skill-group skill-trade" data-kanji="商" open>
         <summary>Трудовые навыки (Trade)</summary>
         <div class="skill-item">
             <span class="skill-name">Жульничество (Skulduggery)</span>
@@ -624,13 +705,13 @@
     </details>
 
     <details id="l5r-techniques-main-block" class="techniques-section" style="margin-top: 20px; border: 1px solid #444; padding: 10px; border-radius: 5px; background: transparent;" open>
-        <summary style="font-size: 1.5em; font-weight: bold; cursor: pointer; margin: 5px 0; user-select: none; color: #d4af37;">
+        <summary style="font-size: 1.5em; font-weight: bold; cursor: pointer; margin: 5px 0; user-select: none; color: var(--c-accent);">
             🥷 Техники Самурая
         </summary>
         <div style="padding-top: 10px;">
-            <div id="tech-edit-form" class="edit-only" style="margin-bottom: 15px; background: #222; padding: 12px; border: 1px dashed #d4af37; border-radius: 8px; color: #fff;">
-                <h4 style="margin: 0 0 8px 0; color: #d4af37; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;">Добавить новую технику:</h4>
-                <label style="display: block; color: #d4af37; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold;">🔍 Быстрый поиск по книге правил</label>
+            <div id="tech-edit-form" class="edit-only" style="margin-bottom: 15px; background: #222; padding: 12px; border: 1px dashed var(--c-accent); border-radius: 8px; color: #fff;">
+                <h4 style="margin: 0 0 8px 0; color: var(--c-accent); text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;">Добавить новую технику:</h4>
+                <label style="display: block; color: var(--c-accent); font-size: 11px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold;">🔍 Быстрый поиск по книге правил</label>
                 <input type="text" id="tech-search-input" list="l5r-db-suggestions" placeholder="Начните вводить название..." style="width: 100%; margin-bottom: 12px;" oninput="L5R.checkSearch(this.value)">
                 <datalist id="l5r-db-suggestions"></datalist>
                 <label style="display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase;">Название техники</label>
@@ -649,7 +730,7 @@
                 </select>
                 <label style="display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase;">Эффект и Описание</label>
                 <textarea id="tech-desc-input" placeholder="Описание эффекта..." rows="3" style="margin-bottom: 12px; font-family: sans-serif;"></textarea>
-                <button onclick="L5R.addTechnique()" style="width: 100%; padding: 12px; background: #5a1a1a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Добавить в лист</button>
+                <button onclick="L5R.addTechnique()" style="width: 100%; padding: 12px; background: var(--c-dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Добавить в лист</button>
             </div>
             <div id="tech-categories-container"></div>
         </div>
@@ -683,7 +764,7 @@
         </div>
         <!-- ТРЕКЕР СОСТОЯНИЙ В БОЮ -->
         <div style="margin-top: 15px; border-top: 1px solid #444; padding-top: 10px;">
-            <label style="color: #d4af37; font-weight: bold; margin-bottom: 8px;">🎭 Негативные Состояния:</label>
+            <label style="color: var(--c-accent); font-weight: bold; margin-bottom: 8px;">🎭 Негативные Состояния:</label>
             <div id="l5r-statuses-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; box-sizing: border-box;">
                 <!-- Сюда JavaScript автоматически добавит все кнопки состояний и списки колец -->
             </div>
@@ -693,13 +774,13 @@
 
     <!-- БЛОК ИНВЕНТАРЯ САМУРАЯ -->
     <details id="l5r-inventory-main-block" style="margin-top: 20px; border: 1px solid #444; padding: 12px; border-radius: 8px; background: transparent;" open>
-        <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer; margin: 5px 0; user-select: none; color: #d4af37;">
+        <summary style="font-size: 1.2em; font-weight: bold; cursor: pointer; margin: 5px 0; user-select: none; color: var(--c-accent);">
             🎒 Снаряжение и Инвентарь
         </summary>
         <div style="padding-top: 10px;">
-            <div id="item-edit-form" class="edit-only" style="display: none; margin-bottom: 15px; background: #222; padding: 12px; border: 1px dashed #d4af37; border-radius: 8px; color: #fff;">
-                <h4 style="margin: 0 0 8px 0; color: #d4af37; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Положить вещь в мешок:</h4>
-                <label style="display: block; color: #d4af37; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold;">🔍 Искать в арсенале Империи</label>
+            <div id="item-edit-form" class="edit-only" style="display: none; margin-bottom: 15px; background: #222; padding: 12px; border: 1px dashed var(--c-accent); border-radius: 8px; color: #fff;">
+                <h4 style="margin: 0 0 8px 0; color: var(--c-accent); text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Положить вещь в мешок:</h4>
+                <label style="display: block; color: var(--c-accent); font-size: 11px; margin-bottom: 4px; text-transform: uppercase; font-weight: bold;">🔍 Искать в арсенале Империи</label>
                 <input type="text" id="item-search-input" list="l5r-items-suggestions" placeholder="Начните вводить (Катана, Доспехи...)" style="width: 100%; margin-bottom: 12px;" oninput="L5R.checkItemSearch(this.value)">
                 <datalist id="l5r-items-suggestions"></datalist>
                 <label style="display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase;">Название предмета</label>
@@ -712,7 +793,7 @@
                 </select>
                 <label style="display: block; color: #aaa; font-size: 11px; margin-bottom: 4px; text-transform: uppercase;">Свойства и Спецификации</label>
                 <textarea id="item-desc-input" placeholder="Урон, скрытность, громоздкость..." rows="2" style="margin-bottom: 12px; font-family: sans-serif; resize: vertical;"></textarea>
-                <button onclick="L5R.addItem()" style="width: 100%; padding: 10px; background: #5a1a1a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Положить в инвентарь</button>
+                <button onclick="L5R.addItem()" style="width: 100%; padding: 10px; background: var(--c-dark); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Положить в инвентарь</button>
             </div>
             <div id="item-categories-container"></div>
         </div>
@@ -722,7 +803,7 @@
     <h2>Богатство Самурая</h2>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; background: #222; border: 1px solid #444; border-radius: 8px; padding: 12px; box-sizing: border-box;">
         <div style="text-align: center; border-right: 1px dashed #444; padding-right: 4px;">
-            <div style="font-size: 11px; color: #d4af37; text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Коку (Koku)</div>
+            <div style="font-size: 11px; color: var(--c-accent); text-transform: uppercase; font-weight: bold; margin-bottom: 5px;">Коку (Koku)</div>
             <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
                 <button class="btn-ring" style="width: 26px; height: 26px; font-size: 14px; display: inline-block !important;" onclick="L5R.changeMoney('koku', -1)">-</button>
                 <span id="money-koku" style="font-size: 18px; font-weight: bold; color: #fff; min-width: 24px;">0</span>
@@ -750,10 +831,10 @@
 
 <!-- МОДАЛЬНОЕ ОКНО ПРОГРЕССА ШКОЛЫ -->
 <div id="school-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box;">
-    <div style="background: #1c1c1c; border: 2px solid #d4af37; border-radius: 12px; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 15px; box-shadow: 0 0 20px rgba(212,175,55,0.3); box-sizing: border-box;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding-bottom: 8px; margin-bottom: 12px;">
-            <div id="modal-school-title" style="color: #d4af37; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Школа самурая</div>
-            <button onclick="L5R.closeSchoolModal()" style="background: #8b0000; color: white; border: none; border-radius: 4px; padding: 4px 10px; font-weight: bold; cursor: pointer; font-size: 14px;">❌</button>
+    <div style="background: var(--c-panel); border: 2px solid var(--c-accent); border-radius: 12px; max-width: 460px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 15px; box-shadow: 0 0 20px rgba(var(--c-accent-rgb),0.3); box-sizing: border-box;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--c-primary); padding-bottom: 8px; margin-bottom: 12px;">
+            <div id="modal-school-title" style="color: var(--c-accent); font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Школа самурая</div>
+            <button onclick="L5R.closeSchoolModal()" style="background: var(--c-primary); color: white; border: none; border-radius: 4px; padding: 4px 10px; font-weight: bold; cursor: pointer; font-size: 14px;">❌</button>
         </div>
 
         <div style="margin-bottom: 12px;">
@@ -764,7 +845,7 @@
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; background: #111;">
                 <thead>
-                    <tr style="background: #2a2222; border-bottom: 2px solid #5a1a1a; color: #d4af37; text-transform: uppercase;">
+                    <tr style="background: #2a2222; border-bottom: 2px solid var(--c-dark); color: var(--c-accent); text-transform: uppercase;">
                         <th style="padding: 6px; border: 1px solid #333;">Прогресс</th>
                         <th style="padding: 6px; border: 1px solid #333;">Тип</th>
                     </tr>
@@ -810,7 +891,7 @@ const ITEMS_DATABASE = [
     { name: "Трезубец (Trident)", type: "Оружие", desc: "Навык: Ближний бой | Дст: 2 | Урн: 4 | Смт: 4\nХват: Двуручный (–)\nСвойства: Хватающее, Боевое | Редкость: 7 | Цена: 10 коку" },
     { name: "Яри / Копьё (Yari)", type: "Оружие", desc: "Навык: Ближний бой | Дст: 2 | Урн: 5 | Смт: 3\nХват: Двуручный (–)\nСвойства: Боевое | Редкость: 3 | Цена: 5 коку" },
     { name: "Дайкю / Большой лук (Daikyū)", type: "Оружие", desc: "Навык: Стрельба | Дст: 3-5 | Урн: 6 | Смт: 4\nХват: Двуручный (–)\nСвойства: Боевое | Редкость: 6 | Цена: 6 коку" },
-    { name: "Конный лук (Horse Archery Bow)", type: "Оружие", desc: "Навык: Стрельба | Дст: 2-4 | Урн: 4 | Смт: 5\nХват: Двуручный (–)\nСвойства: Боевое | Редкость: 4 | Цена: 6 коку" },
+    { name: "Конный лук Синдзё (Horse Archery Bow)", type: "Оружие", desc: "Навык: Стрельба | Дст: 2-4 | Урн: 4 | Смт: 5\nХват: Двуручный (–)\nСвойства: Боевое | Редкость: 4 | Цена: 6 коку" },
     { name: "Юми / Лук (Yumi)", type: "Оружие", desc: "Навык: Стрельба | Дст: 2-5 | Урн: 5 | Смт: 3\nХват: Двуручный (–)\nСвойства: Боевое | Редкость: 3 | Цена: 3 коку" },
     { name: "Оюми / Арбалет (Ōyumi)", type: "Оружие", desc: "Навык: Стрельба | Дст: 2-5 | Урн: 7 | Смт: 3\nХват: Двуручный (–)\nСвойства: Подготавливаемое, Боевое | Редкость: 8 | Цена: 40 коку" },
     { name: "Духовая трубка (Blowpipe)", type: "Оружие", desc: "Навык: Стрельба | Дст: 2-3 | Урн: 1 | Смт: 2\nХват: Одноручный (–)\nСвойства: Потайное | Редкость: 7 | Цена: 5 бу" },
@@ -6053,6 +6134,30 @@ function sanitizeEntries(list, withQty) {
 const RING_IDS = ['air', 'earth', 'fire', 'water', 'void'];
 const BIO_FIELD_IDS = ['bio-name', 'bio-clan', 'bio-school', 'bio-role', 'bio-rank', 'bio-history'];
 
+// ==========================================
+// ОФОРМЛЕНИЕ ПО КЛАНАМ
+// Клан определяется по фамилии в названии школы. Порядок важен: более длинные
+// фамилии проверяются раньше похожих коротких (Кицуки и Кицунэ раньше Кицу, Мирумото раньше Мото)
+// ==========================================
+const CLAN_BY_SCHOOL = [
+    ['кицуки', 'dragon'], ['кицунэ', 'other'], ['мирумото', 'dragon'], ['агася', 'dragon'], ['тогаси', 'dragon'],
+    ['хида', 'crab'], ['хирума', 'crab'], ['кайю', 'crab'], ['куни', 'crab'], ['ясуки', 'crab'],
+    ['асахина', 'crane'], ['дайдодзи', 'crane'], ['додзи', 'crane'], ['какита', 'crane'],
+    ['акодо', 'lion'], ['икома', 'lion'], ['мацу', 'lion'], ['кицу', 'lion'],
+    ['асако', 'phoenix'], ['исава', 'phoenix'], ['сиба', 'phoenix'], ['кайто', 'phoenix'],
+    ['баюси', 'scorpion'], ['сёсуро', 'scorpion'], ['соси', 'scorpion'], ['ёго', 'scorpion'],
+    ['идэ', 'unicorn'], ['иути', 'unicorn'], ['синдзё', 'unicorn'], ['утаку', 'unicorn'], ['мото', 'unicorn'],
+    ['мия', 'imperial'], ['отомо', 'imperial'], ['сэппун', 'imperial'],
+    ['штормов', 'mantis'],
+    ['колат', 'other'], ['ронин', 'other'], ['синсеист', 'other'], ['фортунист', 'other'], ['торитака', 'other'], ['касуга', 'other']
+];
+
+// Запасной вариант, если школа не распознана: клан из поля «Великий Клан»
+const CLAN_BY_CLAN_FIELD = [
+    ['краб', 'crab'], ['журав', 'crane'], ['дракон', 'dragon'], ['лев', 'lion'], ['льв', 'lion'],
+    ['феникс', 'phoenix'], ['скорпион', 'scorpion'], ['единорог', 'unicorn'], ['богомол', 'mantis'], ['император', 'imperial']
+];
+
 const L5R = {
     currentSlot: null,
     isLockMode: true,
@@ -6123,7 +6228,8 @@ const L5R = {
             const card = document.createElement('div');
 
             const isComplex = st.hasRing || st.id === 'dying';
-            card.style.cssText = "background: " + (active ? "#5a1a1a" : "#2a2a2a") + "; border: 1px solid " + (active ? "#d4af37" : "#444") + "; padding: 8px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; user-select: none; text-align: center; " + (isComplex ? "grid-column: span 2;" : "");
+            // Активное состояние: заливка основным цветом клана, золотая/акцентная рамка и свечение, чтобы его было видно в любой теме
+            card.style.cssText = "background: " + (active ? "var(--c-primary)" : "#2a2a2a") + "; border: " + (active ? "2px solid var(--c-accent)" : "1px solid #444") + "; box-shadow: " + (active ? "0 0 10px rgba(var(--c-accent-rgb),0.45), inset 0 0 12px rgba(0,0,0,0.35)" : "none") + "; padding: 8px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; user-select: none; text-align: center; " + (isComplex ? "grid-column: span 2;" : "");
 
             let extraHTML = '';
             if (st.hasRing) {
@@ -6131,7 +6237,7 @@ const L5R = {
                 extraHTML = '<div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; justify-content: center; width: 100%;">';
                 rings.forEach(r => {
                     const isRingActive = !!(window.characterStatuses[st.id + '_' + r.id]);
-                    extraHTML += '<button onclick="event.stopPropagation(); L5R.toggleStatusRing(\'' + st.id + '\', \'' + r.id + '\');" style="background: ' + (isRingActive ? '#b71c1c' : '#111') + '; color: #fff; border: 1px solid ' + (isRingActive ? '#d4af37' : '#555') + '; padding: 6px 10px; font-size: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; min-width: 70px; box-sizing: border-box;">' + r.label + '</button>';
+                    extraHTML += '<button onclick="event.stopPropagation(); L5R.toggleStatusRing(\'' + st.id + '\', \'' + r.id + '\');" style="background: ' + (isRingActive ? '#b71c1c' : '#111') + '; color: #fff; border: 1px solid ' + (isRingActive ? 'var(--c-accent)' : '#555') + '; padding: 6px 10px; font-size: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; min-width: 70px; box-sizing: border-box;">' + r.label + '</button>';
                 });
                 extraHTML += '</div>';
             } else if (st.id === 'dying') {
@@ -6139,11 +6245,11 @@ const L5R = {
                 if (!Number.isFinite(rounds)) rounds = 5;
                 const textLabel = active ? ("Осталось: " + rounds) : "Здоров";
 
-                const btnStyle = 'background: #8b0000; color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.1s;';
+                const btnStyle = 'background: var(--c-primary); color: white; border: none; width: 28px; height: 28px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.1s;';
                 extraHTML = '<div style="display: flex; align-items: center; gap: 12px; margin-top: 6px; background: #111; padding: 4px 12px; border-radius: 5px; border: 1px solid #444;">' +
-                    '<button onclick="event.stopPropagation(); this.style.background=\'#d4af37\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'#8b0000\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(-1);" style="' + btnStyle + '">-</button>' +
+                    '<button onclick="event.stopPropagation(); this.style.background=\'var(--c-accent)\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'var(--c-primary)\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(-1);" style="' + btnStyle + '">-</button>' +
                     '<span style="font-size: 14px; font-weight: bold; color: ' + (active ? '#ff1100' : '#aaa') + '; min-width: 90px; text-align: center;">' + textLabel + '</span>' +
-                    '<button onclick="event.stopPropagation(); this.style.background=\'#d4af37\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'#8b0000\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(1);" style="' + btnStyle + '">+</button>' +
+                    '<button onclick="event.stopPropagation(); this.style.background=\'var(--c-accent)\'; this.style.color=\'#000\'; setTimeout(()=> {this.style.background=\'var(--c-primary)\'; this.style.color=\'#fff\'}, 100); L5R.changeDyingRounds(1);" style="' + btnStyle + '">+</button>' +
                 '</div>';
             }
 
@@ -6221,6 +6327,7 @@ const L5R = {
         document.getElementById('main-character-sheet').style.display = 'none';
         document.getElementById('start-screen').style.display = 'flex';
         this.renderStartScreenList();
+        this.applyClanTheme();
     },
 
     selectAndOpenCharacter: function(id) {
@@ -6581,6 +6688,24 @@ const L5R = {
         const firstSchoolEl = document.querySelector('.xp-school-val');
         const sXP = firstSchoolEl ? firstSchoolEl.innerText : '0';
         document.querySelectorAll('.xp-school-val').forEach(el => el.innerText = sXP);
+
+        this.applyClanTheme();
+    },
+
+    // Перекрашивает лист в цвета клана выбранной школы. На стартовом экране всегда классическое оформление
+    applyClanTheme: function() {
+        const sheet = document.getElementById('main-character-sheet');
+        const sheetVisible = sheet && sheet.style.display !== 'none';
+        let theme = '';
+        if (sheetVisible) {
+            const school = (document.getElementById('bio-school')?.value || '').toLowerCase();
+            const clan = (document.getElementById('bio-clan')?.value || '').toLowerCase();
+            const bySchool = school ? CLAN_BY_SCHOOL.find(([key]) => school.includes(key)) : null;
+            const byClan = clan ? CLAN_BY_CLAN_FIELD.find(([key]) => clan.includes(key)) : null;
+            theme = bySchool ? bySchool[1] : (byClan ? byClan[1] : '');
+        }
+        [...document.body.classList].filter(c => c.startsWith('clan-')).forEach(c => document.body.classList.remove(c));
+        if (theme) document.body.classList.add('clan-' + theme);
     },
 
     changeCombatStatus: function(type, amount) {
@@ -6789,8 +6914,8 @@ const L5R = {
             catDet.style.cssText = 'margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: #222; padding: 10px; outline: none;';
             if (isEdit) catDet.setAttribute('open', 'true');
 
-            let color = cat === "Оружие" ? "#b71c1c" : (cat === "Доспехи" ? "#5a1a1a" : "#d4af37");
-            let html = `<summary style="font-size: 13px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; user-select: none;"><span>🎒 ${cat} (${list.length})</span></summary><div style="padding-top: 6px; margin-top: 6px; border-top: 1px solid #5a1a1a;">`;
+            let color = cat === "Оружие" ? "#b71c1c" : (cat === "Доспехи" ? "var(--c-dark)" : "var(--c-accent)");
+            let html = `<summary style="font-size: 13px; font-weight: bold; color: var(--c-accent); text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; user-select: none;"><span>🎒 ${cat} (${list.length})</span></summary><div style="padding-top: 6px; margin-top: 6px; border-top: 1px solid var(--c-dark);">`;
             if (list.length === 0 && isEdit) html += `<p style="color: #aaa; font-style: italic; margin: 4px 0; font-size: 12px;">Пусто</p>`;
 
             list.forEach(item => {
@@ -6910,7 +7035,7 @@ const L5R = {
             catDet.style.cssText = 'margin-bottom: 10px; border: 1px solid #444; border-radius: 6px; background: #222; padding: 10px; outline: none;';
             if (isEdit) catDet.setAttribute('open', 'true');
             let color = cat === "Преимущество" || cat === "Увлечение" ? "#2e7d32" : "#c62828";
-            let html = `<summary style="font-size: 13px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; user-select: none;"><span>🎭 ${cat} (${list.length})</span></summary><div style="padding-top: 6px; margin-top: 6px; border-top: 1px solid #5a1a1a;">`;
+            let html = `<summary style="font-size: 13px; font-weight: bold; color: var(--c-accent); text-transform: uppercase; cursor: pointer; display: flex; justify-content: space-between; user-select: none;"><span>🎭 ${cat} (${list.length})</span></summary><div style="padding-top: 6px; margin-top: 6px; border-top: 1px solid var(--c-dark);">`;
             if (list.length === 0 && isEdit) html += `<p style="color: #aaa; font-style: italic; margin: 4px 0; font-size: 12px;">Нет записей</p>`;
             list.forEach(trait => {
                 const delBtn = isEdit ? `<button onclick="event.preventDefault(); L5R.deleteTrait(${Number(trait.id)})" style="background:none; border:none; color:#ef5350; cursor:pointer; font-weight:bold; margin-left:10px; font-size: 13px;">❌</button>` : '';
@@ -6934,11 +7059,11 @@ const L5R = {
             const catDetails = document.createElement('details');
             catDetails.style.marginBottom = '12px'; catDetails.style.border = '1px solid #444'; catDetails.style.borderRadius = '8px'; catDetails.style.background = '#222'; catDetails.style.padding = '12px'; catDetails.style.outline = 'none';
             if (isEdit) catDetails.setAttribute('open', 'true');
-            let categoryHTML = `<summary style="font-size: 14px; font-weight: bold; color: #d4af37; text-transform: uppercase; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none;"><span>📜 ${cat} (${techsInCat.length})</span></summary><div style="padding-top: 8px; margin-top: 8px; border-top: 1px solid #5a1a1a;">`;
+            let categoryHTML = `<summary style="font-size: 14px; font-weight: bold; color: var(--c-accent); text-transform: uppercase; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; user-select: none;"><span>📜 ${cat} (${techsInCat.length})</span></summary><div style="padding-top: 8px; margin-top: 8px; border-top: 1px solid var(--c-dark);">`;
             if (techsInCat.length === 0 && isEdit) categoryHTML += `<p style="color: #aaa; font-style: italic; margin: 5px 0; font-size: 13px;">Нет добавленных техник</p>`;
             techsInCat.forEach(tech => {
                 const deleteBtn = isEdit ? `<button onclick="event.preventDefault(); L5R.deleteTechnique(${Number(tech.id)})" style="background:none; border:none; color:#ef5350; cursor:pointer; font-weight:bold; margin-left:10px; padding: 0 5px; font-size: 14px;">❌</button>` : '';
-                const borderStyle = tech.type === "Махо" ? "border-left: 3px solid #b71c1c;" : "border-left: 3px solid #d4af37;";
+                const borderStyle = tech.type === "Махо" ? "border-left: 3px solid #b71c1c;" : "border-left: 3px solid var(--c-accent);";
                 categoryHTML += `<details style="margin: 6px 0; border: 1px dashed #333; border-radius: 4px; background: #1a1a1a;"><summary style="cursor: pointer; font-weight: 500; color: #e0e0e0; display: flex; justify-content: space-between; align-items: center; padding: 8px; user-select: none; word-break: break-word; overflow-wrap: break-word; font-size: 14px;"><span style="flex: 1; padding-right: 5px;">▪ ${escapeHtml(tech.name)}</span>${deleteBtn}</summary><div style="padding: 10px; background: #151515; border-top: 1px solid #333; ${borderStyle} font-size: 13px; white-space: pre-wrap; color: #bbb; word-break: break-word; overflow-wrap: break-word;">${escapeHtml(tech.desc)}</div></details>`;
             });
             categoryHTML += `</div>`; catDetails.innerHTML = categoryHTML; container.appendChild(catDetails);
@@ -6977,7 +7102,10 @@ const L5R = {
         this.autoSaveBound = true;
         BIO_FIELD_IDS.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('input', () => this.saveCharacter());
+            if (el) el.addEventListener('input', () => {
+                this.saveCharacter();
+                if (id === 'bio-school' || id === 'bio-clan') this.applyClanTheme();
+            });
         });
     },
 
@@ -7035,8 +7163,8 @@ const L5R = {
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid #333';
             const isMaster = item.type === "Мастерская способность";
-            const nameColor = isMaster ? "#d4af37" : "#fff";
-            const typeColor = isMaster ? "#d4af37" : "#aaa";
+            const nameColor = isMaster ? "var(--c-accent)" : "#fff";
+            const typeColor = isMaster ? "var(--c-accent)" : "#aaa";
 
             tr.innerHTML = `
                 <td style="padding: 10px 8px; color: ${nameColor}; font-weight: ${isMaster ? 'bold' : 'normal'};">⭕ ${escapeHtml(item.name)}</td>
