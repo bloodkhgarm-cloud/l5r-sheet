@@ -1,28 +1,56 @@
-const CACHE_NAME = 'l5r-sheet-v19';
-const ASSETS = [
+// Сервис-воркер «Книги Записей»: сохраняет приложение в кэш, чтобы лист открывался без интернета.
+// При каждом обновлении файлов на хостинге увеличивайте номер версии — старый кэш удалится сам.
+const CACHE_VERSION = 'l5r-sheet-v2';
+const APP_FILES = [
     './',
-    './index.html'
+    './index.html',
+    './manifest.webmanifest',
+    './icon-192.png',
+    './icon-512.png',
+    './icon-maskable-512.png',
+    './apple-touch-icon.png'
 ];
 
-// Установка Service Worker и кэширование файлов листа персонажа
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS);
-        })
+        caches.open(CACHE_VERSION)
+            .then((cache) => cache.addAll(APP_FILES))
+            .then(() => self.skipWaiting())
     );
 });
 
-// Активация и очистка старого кэша
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        caches.keys()
+            .then((keys) => Promise.all(keys.filter((key) => key !== CACHE_VERSION).map((key) => caches.delete(key))))
+            .then(() => self.clients.claim())
+    );
 });
 
-// Перехват запросов: если сети нет, файл мгновенно берётся из памяти телефона (кэша)
 self.addEventListener('fetch', (event) => {
+    const request = event.request;
+    if (request.method !== 'GET' || new URL(request.url).origin !== self.location.origin) return;
+
+    // Сама страница: сначала сеть (чтобы получать обновления), без сети — из кэша
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    const copy = response.clone();
+                    caches.open(CACHE_VERSION).then((cache) => cache.put('./index.html', copy));
+                    return response;
+                })
+                .catch(() => caches.match('./index.html'))
+        );
+        return;
+    }
+
+    // Иконки и манифест: сначала кэш, потом сеть
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || fetch(event.request);
-        })
+        caches.match(request).then((cached) => cached || fetch(request).then((response) => {
+            const copy = response.clone();
+            caches.open(CACHE_VERSION).then((cache) => cache.put(request, copy));
+            return response;
+        }))
     );
 });
